@@ -67,6 +67,38 @@ DOMAIN_ROLES: Dict[str, str] = {
 UNKNOWN_SUBSTRATES = {"x", "pk", "nrp", "?", ""}
 
 _CONSENSUS = re.compile(r"substrate consensus:\s*(.+)", re.IGNORECASE)
+_KR_ACTIVITY = re.compile(r"KR activity:\s*(\w+)", re.IGNORECASE)
+_TRANSATOR = re.compile(r"transATor:\s*(.+)", re.IGNORECASE)
+
+#: transATor calls mapped onto the oxidation level of the beta carbon.
+#:
+#: Trans-AT assembly lines carry no acyltransferase in the module, so the
+#: usual KR/DH/ER reading does not apply. antiSMASH instead reports what the
+#: ketosynthase clade implies, and that is used directly.
+TRANSATOR_REDUCTION = {
+    "keto": "keto",
+    "beta-oh": "hydroxyl",
+    "beta-d-oh": "hydroxyl",
+    "beta-l-oh": "hydroxyl",
+    "beta-d-ome": "hydroxyl",
+    "alphabeta-oh": "hydroxyl",
+    "alphame-betaoh": "hydroxyl",
+    "alphame-beta-l-oh": "hydroxyl",
+    "alphame-beta-d-oh": "hydroxyl",
+    "non-elongating-beta-oh": "hydroxyl",
+    "db": "ene",
+    "edb": "ene",
+    "zdb": "ene",
+    "shdb": "ene",
+    "red/shdb": "ene",
+    "alphame-db": "ene",
+    "alphame-edb": "ene",
+    "alphame-zdb": "ene",
+    "alpha-d-me-shdb": "ene",
+    "non-elongating-db": "ene",
+    "non-elongating-alphame-edb": "ene",
+    "red": "alkyl",
+}
 
 
 @dataclass
@@ -101,6 +133,28 @@ def _consensus_substrate(qualifiers: Dict[str, List[str]]) -> Optional[str]:
     return None
 
 
+def _is_active(qualifiers: Dict[str, List[str]]) -> bool:
+    """False when antiSMASH reports the domain as inactive.
+
+    About one ketoreductase in four is called inactive; such a domain leaves
+    the beta-keto group alone.
+    """
+    for entry in qualifiers.get("specificity", []):
+        match = _KR_ACTIVITY.search(entry)
+        if match:
+            return match.group(1).strip().lower() != "inactive"
+    return True
+
+
+def _transator_call(qualifiers: Dict[str, List[str]]) -> Optional[str]:
+    for entry in qualifiers.get("specificity", []):
+        match = _TRANSATOR.search(entry)
+        if match:
+            value = match.group(1).strip().lower()
+            return None if value.startswith("(") else value
+    return None
+
+
 @dataclass
 class _Domain:
     role: str
@@ -110,6 +164,8 @@ class _Domain:
     substrate: Optional[str] = None
     sequence: Optional[str] = None
     index_in_gene: Optional[int] = None
+    active: bool = True
+    transator: Optional[str] = None
 
 
 def _collect_domains(record) -> List[_Domain]:
@@ -136,6 +192,8 @@ def _collect_domains(record) -> List[_Domain]:
                 start=int(feature.location.start),
                 substrate=_consensus_substrate(feature.qualifiers),
                 sequence=feature.qualifiers.get("translation", [None])[0],
+                active=_is_active(feature.qualifiers),
+                transator=_transator_call(feature.qualifiers),
             )
         )
     domains.sort(key=lambda d: d.start)
@@ -175,9 +233,22 @@ class _ModuleBuilder:
 
     def add(self, domain: _Domain) -> None:
         role = domain.role
+        if self._current is not None:
+            self._current.domain_count += 1
+            if role == "carrier":
+                self._current.has_carrier = True
+            elif role in ("c", "cy", "ks"):
+                self._current.has_condensation = True
         if role == "ks":
             self._start(PKS, domain)
+            self._current.domain_count = 1  # type: ignore[union-attr]
+            self._current.has_condensation = True  # type: ignore[union-attr]
             self._has_core["ks"] = True
+            if domain.transator:
+                call = domain.transator
+                self._current.non_elongating = call.startswith("non-elongating")  # type: ignore[union-attr]
+                self._current.alpha_methyl = "alphame" in call  # type: ignore[union-attr]
+                self._current.reduction_override = TRANSATOR_REDUCTION.get(call)  # type: ignore[union-attr]
             return
         if role == "cy":
             self._pending_heterocycle = True
@@ -188,6 +259,8 @@ class _ModuleBuilder:
             if self._pending_heterocycle:
                 self._current.heterocyclization = True  # type: ignore[union-attr]
                 self._pending_heterocycle = False
+            if self._current.domain_count == 0:  # type: ignore[union-attr]
+                self._current.domain_count = 1  # type: ignore[union-attr]
             self._has_core["a"] = True
             self._current.substrate = domain.substrate  # type: ignore[union-attr]
             self._current.domain_index = domain.index_in_gene  # type: ignore[union-attr]
@@ -206,6 +279,7 @@ class _ModuleBuilder:
             return
         if role == "kr":
             self._current.kr = True
+            self._current.kr_active = domain.active
         elif role == "dh":
             self._current.dh = True
         elif role == "er":

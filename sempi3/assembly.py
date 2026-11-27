@@ -157,6 +157,9 @@ def assemble(
     assume_acetyl_starter: bool = True,
     skip_unknown_substrates: bool = False,
     release_override: Optional[str] = None,
+    honour_kr_activity: bool = False,
+    honour_transator: bool = True,
+    honour_non_elongating: bool = True,
 ) -> Prediction:
     """Build the backbone encoded by ``spec``.
 
@@ -169,6 +172,14 @@ def assemble(
         release_override: Release mechanism chosen by a model, either a variant
             name or a label such as ``"macrolactone"``. Falls back to the
             domain rule when the named variant could not be built.
+        honour_kr_activity: Let an inactive ketoreductase leave the keto group.
+            Off by default: antiSMASH calls about a quarter of ketoreductases
+            inactive, and honouring that costs 0.007 mean Tanimoto, so the
+            calls look less reliable than the domain's presence.
+        honour_transator: Take the beta-carbon state from the transATor call on
+            trans-AT modules.
+        honour_non_elongating: Let a non-elongating ketosynthase skip the
+            chain extension.
     """
     prediction = Prediction(bgc_id=spec.bgc_id, notes=list(spec.notes))
     if not spec.modules:
@@ -179,6 +190,12 @@ def assemble(
     chain: Optional[Chain] = None
     used = 0
     for module in spec.modules:
+        if not honour_kr_activity:
+            module.kr_active = True
+        if not honour_transator:
+            module.reduction_override = None
+        if not honour_non_elongating:
+            module.non_elongating = False
         try:
             chain, consumed = _apply_module(
                 chain,
@@ -248,7 +265,13 @@ def _apply_module(
         return append_amino_acid(chain, substrate, n_methylation=module.n_methylation), True
 
     # PKS module.
+    if module.non_elongating and chain is not None:
+        # A non-elongating ketosynthase only processes the chain it is given.
+        notes.append(f"module {module.order}: non-elongating, no extension")
+        return chain, False
     branch = monomers.extender_branch(module.substrate)
+    if branch is None and module.alpha_methyl:
+        branch = "C"
     if branch is None and module.n_methylation:
         # A C-methyltransferase in a PKS module methylates the alpha carbon.
         branch = "C"

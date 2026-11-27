@@ -48,6 +48,13 @@ class Module:
             D-configured residue (NRPS only).
         heterocyclization: A Cy domain replaces the condensation domain, so the
             residue is closed into a thiazoline or oxazoline ring.
+        kr_active: False when antiSMASH reports the ketoreductase as inactive,
+            in which case the beta-keto group survives.
+        non_elongating: The ketosynthase does not extend the chain; the module
+            only processes what is already there.
+        alpha_methyl: The alpha carbon carries a methyl branch.
+        reduction_override: Oxidation level of the beta carbon when a source
+            states it outright, as transATor does for trans-AT modules.
         n_methylation: An nMT domain methylates the backbone nitrogen (NRPS).
         gene: Locus tag or protein id the module was found on, for reporting.
         order: Position in the assembly line, starting at 0.
@@ -56,6 +63,11 @@ class Module:
             counting from zero. Together with ``gene`` it identifies the domain
             across data sources.
         sequence: Amino acid sequence of that domain, when the source gives it.
+        has_carrier: A carrier protein (ACP or PCP) was found in the module.
+            A module without one cannot hold a growing chain.
+        has_condensation: A condensation or ketosynthase domain joins this
+            module to the previous one.
+        domain_count: How many assembly-line domains the module gathered.
     """
 
     kind: str
@@ -66,12 +78,19 @@ class Module:
     er: bool = False
     epimerization: bool = False
     heterocyclization: bool = False
+    kr_active: bool = True
+    non_elongating: bool = False
+    alpha_methyl: bool = False
+    reduction_override: Optional[str] = None
     n_methylation: bool = False
     gene: Optional[str] = None
     order: int = 0
     confidence: Optional[float] = None
     domain_index: Optional[int] = None
     sequence: Optional[str] = None
+    has_carrier: bool = False
+    has_condensation: bool = False
+    domain_count: int = 0
 
     def __post_init__(self) -> None:
         if self.kind not in (PKS, NRPS):
@@ -87,7 +106,9 @@ class Module:
     @property
     def reduction_state(self) -> str:
         """Fate of the beta-keto group: ``keto``, ``hydroxyl``, ``ene`` or ``alkyl``."""
-        if not self.kr:
+        if self.reduction_override:
+            return self.reduction_override
+        if not self.kr or not self.kr_active:
             return "keto"
         if not self.dh:
             return "hydroxyl"
@@ -105,6 +126,13 @@ class Module:
             "er": self.er,
             "epimerization": self.epimerization,
             "heterocyclization": self.heterocyclization,
+            "kr_active": self.kr_active,
+            "has_carrier": self.has_carrier,
+            "has_condensation": self.has_condensation,
+            "domain_count": self.domain_count,
+            "non_elongating": self.non_elongating,
+            "alpha_methyl": self.alpha_methyl,
+            "reduction_override": self.reduction_override,
             "n_methylation": self.n_methylation,
             "gene": self.gene,
             "order": self.order,

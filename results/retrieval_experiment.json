@@ -1,0 +1,21 @@
+{
+  "clusters": 389,
+  "features": 195,
+  "groups": [
+    "domain",
+    "substrate",
+    "release",
+    "gene",
+    "family",
+    "layout",
+    "cluster_kind",
+    "cluster",
+    "product"
+  ],
+  "mean_tanimoto_nearest": 0.3232,
+  "median_tanimoto_nearest": 0.2045,
+  "mean_tanimoto_below_cut": 0.1606,
+  "cut": 0.9,
+  "mean_similarity_of_match": 0.9471,
+  "scored": 389
+}

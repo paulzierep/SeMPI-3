@@ -26,7 +26,7 @@
     "accuracy_when_called": 0.5552
   },
   {
-    "variant": "Extended 34-aa, MIBiG + PARAS",
+    "variant": "Extended 34-aa, + PARAS",
     "n": 2680,
     "correct": 1625,
     "abstained": 0,
@@ -35,7 +35,16 @@
     "accuracy_when_called": 0.6063
   },
   {
-    "variant": "Random forest 34-aa, MIBiG only",
+    "variant": "Extended 34-aa, + PARAS + Prieto",
+    "n": 2680,
+    "correct": 1562,
+    "abstained": 0,
+    "extra_training_rows": 3046,
+    "accuracy": 0.5828,
+    "accuracy_when_called": 0.5828
+  },
+  {
+    "variant": "Random forest, MIBiG only",
     "n": 2680,
     "correct": 1651,
     "abstained": 0,
@@ -44,7 +53,7 @@
     "accuracy_when_called": 0.616
   },
   {
-    "variant": "Random forest 34-aa, MIBiG + PARAS",
+    "variant": "Random forest, + PARAS",
     "n": 2680,
     "correct": 1711,
     "abstained": 0,
@@ -53,21 +62,48 @@
     "accuracy_when_called": 0.6384
   },
   {
-    "variant": "antiSMASH leads, nearest fills its gaps",
+    "variant": "Random forest, + PARAS + Prieto",
     "n": 2680,
-    "correct": 1915,
+    "correct": 1658,
     "abstained": 0,
-    "extra_training_rows": 2469,
-    "accuracy": 0.7146,
-    "accuracy_when_called": 0.7146
+    "extra_training_rows": 3046,
+    "accuracy": 0.6187,
+    "accuracy_when_called": 0.6187
   },
   {
-    "variant": "antiSMASH leads, forest fills its gaps",
+    "variant": "Random forest, + both, no identical signatures",
     "n": 2680,
-    "correct": 1913,
+    "correct": 1702,
     "abstained": 0,
-    "extra_training_rows": 2469,
-    "accuracy": 0.7138,
-    "accuracy_when_called": 0.7138
+    "extra_training_rows": 2788,
+    "accuracy": 0.6351,
+    "accuracy_when_called": 0.6351
+  },
+  {
+    "variant": "antiSMASH leads, nearest fills gaps (+both)",
+    "n": 2680,
+    "correct": 1908,
+    "abstained": 0,
+    "extra_training_rows": 3046,
+    "accuracy": 0.7119,
+    "accuracy_when_called": 0.7119
+  },
+  {
+    "variant": "antiSMASH leads, forest fills gaps (+both)",
+    "n": 2680,
+    "correct": 1909,
+    "abstained": 0,
+    "extra_training_rows": 3046,
+    "accuracy": 0.7123,
+    "accuracy_when_called": 0.7123
+  },
+  {
+    "variant": "antiSMASH leads, forest fills gaps (strict)",
+    "n": 2680,
+    "correct": 1910,
+    "abstained": 0,
+    "extra_training_rows": 2788,
+    "accuracy": 0.7127,
+    "accuracy_when_called": 0.7127
   }
 ]

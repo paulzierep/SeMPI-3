@@ -135,6 +135,7 @@ def evaluate_entry(  # noqa: PLR0913
     substrate_fill: Optional[Dict[str, Dict[str, str]]] = None,
     release_prediction: Optional[Dict[str, str]] = None,
     tailoring_enabled: Optional[List[str]] = None,
+    assembly_options: Optional[Dict[str, bool]] = None,
 ) -> Optional[Result]:
     """Score every arm for one cluster, or return ``None`` if out of scope.
 
@@ -182,6 +183,7 @@ def evaluate_entry(  # noqa: PLR0913
                 record.spec,
                 skip_unknown_substrates=True,
                 release_override=(release_prediction or {}).get(accession),
+                **(assembly_options or {}),
             )
             result.notes.extend(prediction.notes[:2])
             enabled = (
@@ -236,7 +238,16 @@ def evaluate_entry(  # noqa: PLR0913
 
 
 def _worker(args):
-    accession, json_dir, antismash_dir, timeout, fill_path, release_path, tailoring_enabled = args
+    (
+        accession,
+        json_dir,
+        antismash_dir,
+        timeout,
+        fill_path,
+        release_path,
+        tailoring_enabled,
+        assembly_options,
+    ) = args
     fill = None
     if fill_path:
         with open(fill_path) as handle:
@@ -254,6 +265,7 @@ def _worker(args):
             substrate_fill=fill,
             release_prediction=releases,
             tailoring_enabled=tailoring_enabled,
+            assembly_options=assembly_options,
         )
     except Exception as exc:  # noqa: BLE001 - one bad entry must not stop the run
         return Result(bgc_id=accession, status=f"error: {exc}")
@@ -268,6 +280,7 @@ def run(
     substrate_fill_path: Optional[Path] = None,
     release_prediction_path: Optional[Path] = None,
     tailoring_enabled: Optional[List[str]] = None,
+    assembly_options: Optional[Dict[str, bool]] = None,
 ) -> List[Result]:
     """Evaluate every MIBiG entry that has a structure and is PKS/NRPS."""
     accessions = sorted(p.stem for p in Path(json_dir).glob("*.json"))
@@ -276,7 +289,16 @@ def run(
     fill_path = str(substrate_fill_path) if substrate_fill_path else None
     release_path = str(release_prediction_path) if release_prediction_path else None
     jobs = [
-        (a, str(json_dir), str(antismash_dir), mcs_timeout, fill_path, release_path, tailoring_enabled)
+        (
+            a,
+            str(json_dir),
+            str(antismash_dir),
+            mcs_timeout,
+            fill_path,
+            release_path,
+            tailoring_enabled,
+            assembly_options,
+        )
         for a in accessions
     ]
     results: List[Result] = []

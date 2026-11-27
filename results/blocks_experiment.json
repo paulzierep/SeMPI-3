@@ -1,0 +1,13 @@
+{
+  "aligned_modules": 370,
+  "clusters_trained_on": 43,
+  "reduction_accuracy": {
+    "domain_rule": 0.6189,
+    "learned": 0.7297
+  },
+  "structures_compared": 40,
+  "structures_changed_by_model": 23,
+  "mean_tanimoto_rule": 0.1419,
+  "mean_tanimoto_learned": 0.1417,
+  "mean_similarity_to_nearest_known": 0.2563
+}
