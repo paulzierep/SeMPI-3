@@ -37,6 +37,20 @@ publishes that output for every entry, so nothing has to be installed or run.
 | `mibig_antismash_4.0_gbk_as8b1.tar.bz2` | 64 MB | antiSMASH 8 output per entry: domains, substrates, baseline SMILES |
 | `dataset_paras.tsv` | 175 kB | 2,873 curated A-domain substrates with binding-pocket signatures ([PARAS](https://github.com/BTheDragonMaster/parasect), CC BY 4.0) |
 
+Optional, and fetched by hand because the publisher blocks automated requests:
+`A_domains.csv` from the [SeMPI 2.0 supplement](https://www.mdpi.com/2218-1989/11/1/13/s1)
+(Zierep et al., *Metabolites* 2020, CC BY). It lists 2,868 A domains, 1,546 of
+them from Prieto et al. and keyed by UniProt accession rather than by cluster.
+Put it in `data/external/sempi2/` and run:
+
+```bash
+python scripts/build_prieto_dataset.py --csv data/external/sempi2/A_domains.csv
+```
+
+That fetches the proteins from UniProt, locates each adenylation domain by
+aligning the reference domain along the protein, and writes binding-pocket
+signatures that `scripts/experiment_substrates.py` can train on.
+
 Of 3,013 MIBiG entries, **1,457** are PKS/NRPS with both a known structure and
 an antiSMASH annotation. That is the benchmark set.
 

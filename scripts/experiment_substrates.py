@@ -36,7 +36,31 @@ from sempi3 import (
 )
 
 PARAS_TSV = Path("data/external/paras/dataset_paras.tsv")
+PRIETO = Path("data/interim/prieto_adomains.jsonl")
 ADOMAINS = Path("data/interim/adomains.jsonl")
+
+
+def load_prieto() -> List[dict]:
+    """A domains from the SeMPI 2.0 supplement, via Prieto et al."""
+    if not PRIETO.exists():
+        return []
+    rows = []
+    for line in PRIETO.read_text().splitlines():
+        if not line.strip():
+            continue
+        row = json.loads(line)
+        label = substrates.normalise(row.get("substrate"))
+        if not label or len(row.get("signature", "")) != len(st.EXTENDED_POSITIONS):
+            continue
+        rows.append(
+            {
+                "accessions": [row["accession"]],
+                "signature": row["signature"],
+                "code": row["code"],
+                "substrate": label,
+            }
+        )
+    return rows
 
 
 def load_paras() -> List[dict]:
@@ -130,6 +154,7 @@ def evaluate(
     seed: int = 0,
     model: str = "nearest",
     antismash_first: bool = False,
+    strict: bool = False,
 ) -> Tuple[int, int, int, int]:
     """Return (n, correct, abstained, extra_training_rows_used)."""
     features = np.array([r[feature_key] for r in records])
@@ -152,10 +177,15 @@ def evaluate(
         if paras_rows:
             # Genes of the clusters under test, so added data cannot leak them.
             blocked = set()
+            blocked_signatures = set()
             for record in np.array(records)[test]:
                 blocked.add(record["gene"])
+                if strict:
+                    blocked_signatures.add(record["signature"])
             for row in paras_rows:
                 if any(accession in blocked for accession in row["accessions"]):
+                    continue
+                if strict and row["signature"] in blocked_signatures:
                     continue
                 train_features.append(row["signature"] if feature_key == "signature" else row["code"])
                 train_labels.append(row["substrate"])
@@ -219,18 +249,25 @@ def main() -> int:
         }
     ]
 
+    prieto = load_prieto()
+    both = paras + prieto
+    print(f"Prieto rows: {len(prieto)}\n")
     variants = [
-        ("Stachelhaus 9-aa, MIBiG only", "code", None, 0.0, False, "nearest", False),
-        ("Extended 34-aa, MIBiG only", "signature", None, 0.0, False, "nearest", False),
-        ("Extended 34-aa, MIBiG + PARAS", "signature", paras, 0.0, False, "nearest", False),
-        ("Random forest 34-aa, MIBiG only", "signature", None, 0.0, False, "forest", False),
-        ("Random forest 34-aa, MIBiG + PARAS", "signature", paras, 0.0, False, "forest", False),
-        ("antiSMASH leads, nearest fills its gaps", "signature", paras, 0.0, False, "nearest", True),
-        ("antiSMASH leads, forest fills its gaps", "signature", paras, 0.0, False, "forest", True),
+        ("Stachelhaus 9-aa, MIBiG only", "code", None, "nearest", False, False),
+        ("Extended 34-aa, MIBiG only", "signature", None, "nearest", False, False),
+        ("Extended 34-aa, + PARAS", "signature", paras, "nearest", False, False),
+        ("Extended 34-aa, + PARAS + Prieto", "signature", both, "nearest", False, False),
+        ("Random forest, MIBiG only", "signature", None, "forest", False, False),
+        ("Random forest, + PARAS", "signature", paras, "forest", False, False),
+        ("Random forest, + PARAS + Prieto", "signature", both, "forest", False, False),
+        ("Random forest, + both, no identical signatures", "signature", both, "forest", False, True),
+        ("antiSMASH leads, nearest fills gaps (+both)", "signature", both, "nearest", True, False),
+        ("antiSMASH leads, forest fills gaps (+both)", "signature", both, "forest", True, False),
+        ("antiSMASH leads, forest fills gaps (strict)", "signature", both, "forest", True, True),
     ]
-    for name, key, extra, min_identity, fallback, model, as_first in variants:
+    for name, key, extra, model, as_first, strict in variants:
         total, correct, abstained, extra_used = evaluate(
-            records, key, args.folds, extra, min_identity, fallback, model=model, antismash_first=as_first
+            records, key, args.folds, extra, 0.0, False, model=model, antismash_first=as_first, strict=strict
         )
         results.append(
             {
@@ -242,14 +279,14 @@ def main() -> int:
             }
         )
 
-    print(f"{'variant':52s} {'accuracy':>9s} {'when called':>12s} {'abstained':>10s}")
+    print(f"{'variant':46s} {'accuracy':>9s} {'when called':>12s} {'abstained':>10s}")
     for row in results:
         accuracy = row["correct"] / row["n"]
         called = row["n"] - row["abstained"]
         when_called = row["correct"] / called if called else 0.0
         row["accuracy"] = round(accuracy, 4)
         row["accuracy_when_called"] = round(when_called, 4)
-        print(f"{row['variant']:52s} {accuracy:9.3f} {when_called:12.3f} {row['abstained']:10d}")
+        print(f"{row['variant']:46s} {accuracy:9.3f} {when_called:12.3f} {row['abstained']:10d}")
 
     out = Path("results/substrate_experiment.json")
     out.parent.mkdir(parents=True, exist_ok=True)
