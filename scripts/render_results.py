@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Render benchmark numbers into the README between the RESULTS markers.
+"""Render the headline benchmark numbers into the README.
 
 Usage:
     python scripts/render_results.py results/benchmark.summary.json
@@ -16,19 +16,22 @@ END = "<!-- RESULTS:END -->"
 
 ARM_LABELS = {
     "antismash": "antiSMASH (baseline)",
-    "sempi3_antismash": "SeMPI-3 from antiSMASH",
-    "sempi3_mibig": "SeMPI-3 from MIBiG modules",
+    "sempi3_antismash": "**SeMPI-3**",
+    "sempi3_mibig": "SeMPI-3 with curated substrates",
 }
 
 
 def render(summary: dict) -> str:
+    """A compact table for the README; the detail lives in docs/benchmark.md."""
     arms = summary["arms"]
+    head = summary.get("head_to_head_sempi3_antismash", {})
+    by_class = summary.get("by_class", {})
+
     lines = [
-        f"Benchmark set: **{summary['clusters']} clusters** "
-        "(MIBiG 4.0 PKS/NRPS entries with a known structure).",
+        f"Over the **{summary['clusters']} MIBiG 4.0 PKS/NRPS clusters** with a known structure:",
         "",
-        "| Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |",
-        "|---|---|---|---|---|---|---|",
+        "| | Clusters predicted | Tanimoto | Scoring ≥0.4 | Structure match |",
+        "|---|---|---|---|---|",
     ]
     for arm, label in ARM_LABELS.items():
         data = arms.get(arm)
@@ -36,31 +39,23 @@ def render(summary: dict) -> str:
             continue
         lines.append(
             f"| {label} | {data['predicted']} | {data['tanimoto_mean']:.3f} | "
-            f"{data['tanimoto_median']:.3f} | {data['tanimoto_ge_0.4']} | "
-            f"{data['tanimoto_ge_0.6']} | {data['coverage_pred_mean']:.3f} |"
+            f"{data['tanimoto_ge_0.4']} | {data['coverage_pred_mean']:.3f} |"
         )
 
-    lines += ["", "**Head to head against antiSMASH**, on clusters where both made a prediction:", ""]
-    lines += ["| Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |", "|---|---|---|---|---|---|"]
-    for arm in ("sempi3_antismash", "sempi3_mibig"):
-        head = summary.get(f"head_to_head_{arm}")
-        if not head:
-            continue
-        lines.append(
-            f"| {ARM_LABELS[arm]} | {head['compared']} | {head['wins']} | {head['ties']} | "
-            f"{head['losses']} | {head['mean_delta']:+.3f} |"
-        )
+    if head:
+        lines += [
+            "",
+            f"Head to head on the {head['compared']} clusters where both predict: "
+            f"**{head['wins']} wins, {head['losses']} losses** "
+            f"({head['mean_delta']:+.3f} mean Tanimoto).",
+        ]
 
-    by_class = summary.get("by_class", {})
     if by_class:
-        lines += ["", "**Mean Tanimoto by cluster class:**", ""]
-        lines += ["| Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |"]
-        lines += ["|---|---|---|---|---|"]
+        pieces = []
         for label, data in by_class.items():
-            lines.append(
-                f"| {label} | {int(data['clusters'])} | {data['antismash']:.3f} | "
-                f"{data['sempi3_antismash']:.3f} | {data['sempi3_mibig']:.3f} |"
-            )
+            name = label.replace("_only", "").replace("_", " ")
+            pieces.append(f"{name} {data['sempi3_antismash']:.3f} vs {data['antismash']:.3f}")
+        lines += ["", "By class (SeMPI-3 vs antiSMASH): " + ", ".join(pieces) + "."]
 
     return "\n".join(lines)
 
