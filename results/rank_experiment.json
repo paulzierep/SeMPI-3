@@ -1,0 +1,7 @@
+{
+  "clusters": 1341,
+  "changed": 576,
+  "mean_tanimoto_rule": 0.198,
+  "mean_tanimoto_ranked": 0.2044,
+  "mean_tanimoto_oracle": 0.2407
+}

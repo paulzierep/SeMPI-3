@@ -174,9 +174,15 @@ def resolve(name: str) -> Optional[str]:
         return AMINO_ACIDS[key]
     # Names such as "D-alanine" or "N-methyl-leucine" carry the modification in
     # the name; the assembly engine applies those separately, so strip them.
-    for prefix in ("d-", "l-", "(2s)-", "(2r)-"):
-        if key.startswith(prefix) and key[len(prefix) :] in AMINO_ACIDS:
-            return AMINO_ACIDS[key[len(prefix) :]]
+    for prefix in ("d-", "l-", "(2s)-", "(2r)-", "r-", "s-"):
+        if not key.startswith(prefix):
+            continue
+        # The isomer prefix may sit in front of a short name, so the alias
+        # table has to be consulted again: "D-Ala" -> "ala" -> "alanine".
+        stripped = key[len(prefix) :]
+        stripped = ALIASES.get(stripped, stripped)
+        if stripped in AMINO_ACIDS:
+            return AMINO_ACIDS[stripped]
     return None
 
 
@@ -191,6 +197,32 @@ def extender_branch(substrate: Optional[str], default: Optional[str] = None) -> 
     if not substrate:
         return default
     return PKS_EXTENDER_BRANCHES.get(substrate.strip().lower(), default)
+
+
+def methylate_amine(smiles: str) -> str:
+    """Put a methyl group on a monomer's backbone nitrogen.
+
+    Used when the loading module carries an N-methyltransferase, where there
+    is no preceding amide bond for the usual route to act on.
+    """
+    mol = Chem.MolFromSmiles(smiles)
+    if mol is None:
+        return smiles
+    for pattern in (ALPHA_AMINO_ACID, OMEGA_AMINO_ACID):
+        matches = mol.GetSubstructMatches(pattern)
+        if not matches:
+            continue
+        editable = Chem.RWMol(mol)
+        nitrogen = matches[0][0]
+        methyl = editable.AddAtom(Chem.Atom(6))
+        editable.AddBond(nitrogen, methyl, Chem.BondType.SINGLE)
+        try:
+            product = editable.GetMol()
+            Chem.SanitizeMol(product)
+        except Exception:  # noqa: BLE001
+            return smiles
+        return Chem.MolToSmiles(product)
+    return smiles
 
 
 def invert_alpha_carbon(smiles: str) -> str:

@@ -229,12 +229,17 @@ def best_match(
     compound_names: Optional[List[str]] = None,
     timeout: int = MCS_TIMEOUT,
     strict: bool = False,
+    with_mcs: bool = True,
 ) -> Optional[Similarity]:
     """Best score over all release variants and all known compounds.
 
     A cluster often makes several congeners, and the release mechanism is
     rarely annotated, so the kindest pairing is used. The chosen variant and
     compound are recorded on the result so this stays visible.
+
+    Choosing the pairing needs only fingerprints; the common-substructure
+    search runs once, on the winner. ``with_mcs=False`` skips even that, for
+    callers that read only the fingerprint score.
     """
     names = list(compound_names or [])
     best: Optional[Similarity] = None
@@ -252,7 +257,7 @@ def best_match(
                 best = score
                 best_pair = (pred_smiles, true_smiles)
 
-    if best is None or best_pair is None:
+    if best is None or best_pair is None or not with_mcs:
         return best
     full = compare(best_pair[0], best_pair[1], timeout=timeout, with_mcs=True, strict=strict)
     if full is not None:

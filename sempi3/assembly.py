@@ -212,9 +212,12 @@ def assemble(
                 notes=prediction.notes,
             )
         except ChemError as exc:
-            prediction.notes.append(f"module {module.order}: {exc}")
-            prediction.failed = True
-            return prediction
+            # One module that cannot be built is not a reason to lose the
+            # whole cluster: an aryl acid such as dihydroxybenzoate has no
+            # amine and cannot extend a peptide, but the rest of the chain is
+            # still worth reporting.
+            prediction.notes.append(f"module {module.order}: {exc}, skipped")
+            consumed = False
         used += int(consumed)
 
     if chain is None:
@@ -260,7 +263,7 @@ def _apply_module(
             substrate = monomers.invert_alpha_carbon(substrate)
         if chain is None:
             if module.n_methylation:
-                notes.append(f"module {module.order}: N-methylation on the starter is not modelled")
+                substrate = monomers.methylate_amine(substrate)
             return start_chain(substrate), True
         if module.heterocyclization:
             # A Cy domain only closes a ring when the residue has a thiol or

@@ -18,27 +18,36 @@ needs_data = pytest.mark.skipif(not EXAMPLE.exists(), reason="run scripts/fetch_
 def test_signature_table_is_packaged():
     rows = predictor._reference()
     assert len(rows) > 1000
-    signature, substrate, support = rows[0]
+    signature, substrate, support, _smiles = rows[0]
     assert len(signature) == len(st.EXTENDED_POSITIONS)
     assert substrate
     assert support >= 1
 
 
+def test_almost_every_signature_carries_a_structure():
+    # A substrate without a structure cannot be built into the chain, so the
+    # packaged table has to supply one for nearly all of them.
+    rows = predictor._reference()
+    without = sum(1 for _sig, _sub, _sup, smiles in rows if not smiles)
+    assert without / len(rows) < 0.05
+
+
 def test_predict_substrate_recognises_the_reference_pocket():
     # The packaged reference contains real domains; the phenylalanine pocket
     # of the GrsA reference has to come back as phenylalanine.
-    substrate, confidence = predictor.predict_substrate(st.reference_sequence())
+    substrate, confidence, smiles = predictor.predict_substrate(st.reference_sequence())
     assert substrate == "phenylalanine"
     assert confidence == pytest.approx(1.0, abs=0.2)
+    assert smiles
 
 
 def test_predict_substrate_abstains_on_nonsense():
-    substrate, _confidence = predictor.predict_substrate("M" * 400)
+    substrate, _confidence, _smiles = predictor.predict_substrate("M" * 400)
     assert substrate is None
 
 
 def test_predict_substrate_abstains_on_a_short_sequence():
-    substrate, confidence = predictor.predict_substrate("MKV")
+    substrate, confidence, _smiles = predictor.predict_substrate("MKV")
     assert substrate is None
     assert confidence == 0.0
 

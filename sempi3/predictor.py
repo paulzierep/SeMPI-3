@@ -39,9 +39,9 @@ MIN_IDENTITY = 0.6
 
 
 @lru_cache(maxsize=1)
-def _reference() -> List[Tuple[str, str, int]]:
-    """Signatures with their substrate and how many domains support them."""
-    rows: List[Tuple[str, str, int]] = []
+def _reference() -> List[Tuple[str, str, int, str]]:
+    """Signatures with their substrate, support, and that substrate's SMILES."""
+    rows: List[Tuple[str, str, int, str]] = []
     if not SIGNATURE_TABLE.exists():  # pragma: no cover - packaged with the module
         return rows
     with open(SIGNATURE_TABLE) as handle:
@@ -49,30 +49,59 @@ def _reference() -> List[Tuple[str, str, int]]:
         for line in handle:
             parts = line.rstrip("\n").split("\t")
             if len(parts) >= 3:
-                rows.append((parts[0], parts[1], int(parts[2])))
+                rows.append((parts[0], parts[1], int(parts[2]), parts[3] if len(parts) > 3 else ""))
     return rows
 
 
-def predict_substrate(sequence: str) -> Tuple[Optional[str], float]:
+@lru_cache(maxsize=1)
+def _structures_by_name() -> Dict[str, str]:
+    """Substrate name -> SMILES, from the packaged reference."""
+    table: Dict[str, str] = {}
+    for _signature, label, _support, smiles in _reference():
+        if smiles and label not in table:
+            table[label] = smiles
+    return table
+
+
+def structure_for(name: str) -> Optional[str]:
+    """The structure of a named substrate, from the monomer table or the reference.
+
+    A predicted substrate with no structure cannot be built into the chain, so
+    both sources are consulted before giving up.
+    """
+    from . import monomers, substrates as substrate_names
+
+    if not name:
+        return None
+    direct = monomers.resolve(name)
+    if direct:
+        return direct
+    normalised = substrate_names.normalise(name) or name.strip().lower()
+    return _structures_by_name().get(normalised)
+
+
+def predict_substrate(sequence: str) -> Tuple[Optional[str], float, str]:
     """Name the substrate of one adenylation domain, with its confidence.
 
     Confidence is the share of pocket residues shared with the closest known
-    domain, so an exact pocket gives 1.0.
+    domain, so an exact pocket gives 1.0. The structure is returned alongside
+    the name, since a name without one cannot be built into the chain.
     """
     signature = st.extract_signature(sequence)
     if signature.count(st.GAP) > 3:
-        return None, 0.0
+        return None, 0.0, ""
     best_label: Optional[str] = None
     best_score = 0.0
     best_support = 0
-    for known, label, support in _reference():
+    best_smiles = ""
+    for known, label, support, smiles in _reference():
         matches = sum(1 for a, b in zip(signature, known) if a == b and a != st.GAP)
         score = matches / len(signature)
         if score > best_score or (score == best_score and support > best_support):
-            best_score, best_label, best_support = score, label, support
+            best_score, best_label, best_support, best_smiles = score, label, support, smiles
     if best_score < MIN_IDENTITY:
-        return None, best_score
-    return best_label, best_score
+        return None, best_score, ""
+    return best_label, best_score, best_smiles
 
 
 @dataclass
@@ -145,9 +174,11 @@ def _predict_record(record, fill_substrates: bool, apply_tailoring: bool) -> Clu
         for module in spec.modules:
             if module.kind != NRPS or module.substrate or not module.sequence:
                 continue
-            substrate, confidence = predict_substrate(module.sequence)
+            substrate, confidence, smiles = predict_substrate(module.sequence)
             if substrate:
-                module.substrate = substrate
+                # Prefer the structure: a name the monomer table does not know
+                # would be dropped when the chain is built.
+                module.substrate = f"smiles:{smiles}" if smiles else substrate
                 module.confidence = confidence
                 filled += 1
 

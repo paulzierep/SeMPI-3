@@ -38,6 +38,10 @@ def test_every_alias_points_at_a_structure():
 def test_resolve_is_case_insensitive_and_handles_isomer_prefix():
     assert monomers.resolve("Ala") == monomers.AMINO_ACIDS["alanine"]
     assert monomers.resolve("D-alanine") == monomers.AMINO_ACIDS["alanine"]
+    # An isomer prefix in front of a short name has to work too, or the
+    # residue is silently dropped when the chain is built.
+    assert monomers.resolve("D-Ala") == monomers.AMINO_ACIDS["alanine"]
+    assert monomers.resolve("D-Leu") == monomers.AMINO_ACIDS["leucine"]
     assert monomers.resolve("not-a-monomer") is None
 
 

@@ -251,23 +251,23 @@ Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known struct
 | Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
 |---|---|---|---|---|---|---|
 | antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
-| SeMPI-3 from antiSMASH | 1341 | 0.195 | 0.150 | 127 | 40 | 0.502 |
-| SeMPI-3 from MIBiG modules | 528 | 0.276 | 0.205 | 122 | 41 | 0.578 |
+| SeMPI-3 from antiSMASH | 1400 | 0.204 | 0.154 | 156 | 44 | 0.531 |
+| SeMPI-3 from MIBiG modules | 578 | 0.270 | 0.197 | 131 | 43 | 0.584 |
 
 **Head to head against antiSMASH**, on clusters where both made a prediction:
 
 | Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
 |---|---|---|---|---|---|
-| SeMPI-3 from antiSMASH | 1161 | 862 | 7 | 292 | +0.061 |
-| SeMPI-3 from MIBiG modules | 490 | 360 | 5 | 125 | +0.098 |
+| SeMPI-3 from antiSMASH | 1212 | 877 | 7 | 328 | +0.072 |
+| SeMPI-3 from MIBiG modules | 536 | 375 | 4 | 157 | +0.095 |
 
 **Mean Tanimoto by cluster class:**
 
 | Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |
 |---|---|---|---|---|
-| NRPS_only | 469 | 0.219 | 0.302 | 0.372 |
-| PKS_only | 677 | 0.091 | 0.128 | 0.132 |
-| hybrid | 375 | 0.136 | 0.203 | 0.231 |
+| NRPS_only | 469 | 0.219 | 0.301 | 0.339 |
+| PKS_only | 677 | 0.091 | 0.137 | 0.139 |
+| hybrid | 375 | 0.136 | 0.217 | 0.233 |
 
 Tanimoto is low for every arm in absolute terms, which is expected: all three predict a *backbone*, while the reference is the finished, tailored natural product. The comparison between arms is the meaningful part.
 <!-- RESULTS:END -->

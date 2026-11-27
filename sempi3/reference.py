@@ -51,6 +51,29 @@ def _read_fasta(path: Path) -> Dict[str, str]:
     return entries
 
 
+def read_substrate_smiles(directory: Path) -> Dict[str, str]:
+    """Structures for substrate names, from a PARAS release.
+
+    Our own monomer table covers the common residues; PARAS names several
+    hundred more, and without a structure a predicted substrate cannot be
+    built into the chain at all.
+    """
+    path = Path(directory) / "smiles.tsv"
+    table: Dict[str, str] = {}
+    if not path.exists():
+        return table
+    with open(path) as handle:
+        for index, line in enumerate(handle):
+            if index == 0:
+                continue
+            parts = line.rstrip("\n").split("\t")
+            if len(parts) < 2 or not parts[1].strip():
+                continue
+            name = substrates.normalise(parts[0]) or parts[0].strip().lower()
+            table[name] = parts[1].strip()
+    return table
+
+
 def read_paras(directory: Path) -> Dict[str, str]:
     """Signatures and substrates from a PARAS database directory.
 
@@ -126,13 +149,25 @@ def build(
             table[signature][label] += 1
             from_extra += 1
 
+    # Every label needs a structure, or a domain carrying it contributes
+    # nothing to the chain. Our own monomers come first, then PARAS's table.
+    from . import monomers
+
+    extra_smiles = read_substrate_smiles(paras_dir) if paras_dir else {}
     out.parent.mkdir(parents=True, exist_ok=True)
+    without_structure = 0
     with open(out, "w") as handle:
-        handle.write("signature\tsubstrate\tsupport\n")
+        handle.write("signature\tsubstrate\tsupport\tsmiles\n")
         for signature in sorted(table):
             counts = table[signature]
             label, _ = counts.most_common(1)[0]
-            handle.write(f"{signature}\t{label}\t{sum(counts.values())}\n")
+            smiles = monomers.resolve(label) or extra_smiles.get(label, "")
+            if not smiles:
+                without_structure += 1
+            handle.write(f"{signature}\t{label}\t{sum(counts.values())}\t{smiles}\n")
 
-    print(f"{len(table)} signatures from {from_mibig} MIBiG domains and {from_extra} extra rows")
+    print(
+        f"{len(table)} signatures from {from_mibig} MIBiG domains and {from_extra} extra rows; "
+        f"{without_structure} still have no structure"
+    )
     return out

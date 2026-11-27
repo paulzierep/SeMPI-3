@@ -320,6 +320,60 @@ def plot_by_class(df: pd.DataFrame, theme: Theme, path: Path) -> Path:
     return _save(fig, path, theme)
 
 
+def plot_properties(report: Dict[str, dict], theme: Theme, path: Path) -> Path:
+    """How well the cluster alone predicts each property of its product."""
+    targets = report.get("targets", {})
+    counts = [(k, v) for k, v in targets.items() if v.get("kind") == "count"]
+    binaries = [(k, v) for k, v in targets.items() if v.get("kind") == "binary"]
+    counts.sort(key=lambda kv: kv[1]["r2"])
+    binaries.sort(key=lambda kv: kv[1]["gain"])
+
+    fig, axes = plt.subplots(
+        1, 2, figsize=(11.5, 4.6), facecolor=theme.surface, gridspec_kw={"width_ratios": [1.3, 1]}
+    )
+
+    ax = axes[0]
+    _style_axes(ax, theme, grid_axis="x")
+    labels = [k.replace("n_", "").replace("_", " ") for k, _ in counts]
+    values = [v["r2"] for _, v in counts]
+    positions = np.arange(len(labels))
+    ax.barh(positions, values, color=theme.series["sempi3_antismash"], height=0.62, linewidth=0)
+    for y, value in zip(positions, values):
+        ax.annotate(
+            f"{value:.2f}", xy=(value, y), xytext=(4, 0), textcoords="offset points",
+            va="center", fontsize=8, color=theme.text_secondary,
+        )
+    ax.set_yticks(positions)
+    ax.set_yticklabels(labels, color=theme.text_primary, fontsize=9)
+    ax.set_xlim(0, 1)
+    ax.set_xlabel("variance explained", color=theme.text_secondary, fontsize=9)
+    _title(ax, "How much of a count the cluster explains", "1.0 would be exact", theme)
+
+    ax = axes[1]
+    _style_axes(ax, theme, grid_axis="x")
+    labels = [k.replace("has_", "").replace("_", " ") for k, _ in binaries]
+    positions = np.arange(len(labels))
+    base = [v["majority"] for _, v in binaries]
+    got = [v["accuracy"] for _, v in binaries]
+    ax.barh(positions + 0.19, got, height=0.34, color=theme.series["sempi3_antismash"],
+            label="predicted from the cluster", linewidth=0)
+    ax.barh(positions - 0.19, base, height=0.34, color=theme.series["antismash"],
+            label="always answer with the majority", linewidth=0)
+    for y, value in zip(positions + 0.19, got):
+        ax.annotate(f"{value:.2f}", xy=(value, y), xytext=(4, 0), textcoords="offset points",
+                    va="center", fontsize=8, color=theme.text_secondary)
+    ax.set_yticks(positions)
+    ax.set_yticklabels(labels, color=theme.text_primary, fontsize=9)
+    ax.set_xlim(0, 1.05)
+    ax.set_xlabel("accuracy", color=theme.text_secondary, fontsize=9)
+    _title(ax, "Does the product carry it?", "yes or no, out of fold", theme)
+
+    handles, legend_labels = ax.get_legend_handles_labels()
+    fig.tight_layout(rect=[0, 0.10, 1, 0.88])
+    _figure_legend(fig, handles, legend_labels, theme, ncol=2)
+    return _save(fig, path, theme)
+
+
 def _save(fig, path: Path, theme: Theme) -> Path:
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -328,9 +382,14 @@ def _save(fig, path: Path, theme: Theme) -> Path:
     return path
 
 
-def render_all(csv_path: Path, out_dir: Path) -> List[Path]:
+def render_all(csv_path: Path, out_dir: Path, properties: Optional[Path] = None) -> List[Path]:
     """Render every figure in both modes from a benchmark table."""
+    import json
+
     df = pd.read_csv(csv_path)
+    property_report = None
+    if properties and Path(properties).exists():
+        property_report = json.loads(Path(properties).read_text())
     written: List[Path] = []
     builders = (
         ("quality", plot_quality),
@@ -338,7 +397,11 @@ def render_all(csv_path: Path, out_dir: Path) -> List[Path]:
         ("by_class", plot_by_class),
     )
     for theme in THEMES:
+        suffix = "" if theme.name == "light" else "-dark"
         for name, builder in builders:
-            suffix = "" if theme.name == "light" else "-dark"
             written.append(builder(df, theme, Path(out_dir) / f"{name}{suffix}.png"))
+        if property_report:
+            written.append(
+                plot_properties(property_report, theme, Path(out_dir) / f"properties{suffix}.png")
+            )
     return written

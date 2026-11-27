@@ -128,14 +128,20 @@ def apply_substrate_fill(spec, fill: Dict[str, str]) -> int:
     ``fill`` maps ``"<gene>:<domain index>"`` to a substrate name. Only modules
     antiSMASH left empty are touched, so its own calls always win.
     """
+    from . import predictor
+
     applied = 0
     for module in spec.modules:
         if module.substrate or module.domain_index is None:
             continue
         predicted = fill.get(f"{module.gene}:{module.domain_index}")
-        if predicted:
-            module.substrate = predicted
-            applied += 1
+        if not predicted:
+            continue
+        # Prefer the structure: a name the monomer table does not know would
+        # be dropped when the chain is built.
+        smiles = predictor.structure_for(predicted)
+        module.substrate = f"smiles:{smiles}" if smiles else predicted
+        applied += 1
     return applied
 
 

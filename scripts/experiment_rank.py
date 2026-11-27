@@ -210,15 +210,17 @@ def main() -> int:
         if best_candidate is None:
             continue
 
+        # Only the fingerprint score is reported here, so the
+        # common-substructure search is skipped entirely.
         rule = compare.best_match(
             {entry["rule_choice"] or "x": entry["rule_smiles"]},
-            entry["structures"], entry["names"], timeout=2,
+            entry["structures"], entry["names"], with_mcs=False,
         )
         ranked = compare.best_match(
-            {best_candidate[0]: best_candidate[1]}, entry["structures"], entry["names"], timeout=2
+            {best_candidate[0]: best_candidate[1]}, entry["structures"], entry["names"], with_mcs=False
         )
         oracle = compare.best_match(
-            dict(entry["candidates"]), entry["structures"], entry["names"], timeout=2
+            dict(entry["candidates"]), entry["structures"], entry["names"], with_mcs=False
         )
         if rule and ranked and oracle:
             rule_scores.append(rule.tanimoto)
