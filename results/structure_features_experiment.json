@@ -1,0 +1,104 @@
+{
+  "features": 264,
+  "dropped": [],
+  "targets": {
+    "has_macrocycle": {
+      "kind": "binary",
+      "accuracy": 0.8173,
+      "majority": 0.6127,
+      "gain": 0.2047,
+      "positive_rate": 0.3873
+    },
+    "has_halogen": {
+      "kind": "binary",
+      "accuracy": 0.9481,
+      "majority": 0.9126,
+      "gain": 0.0355,
+      "positive_rate": 0.0874
+    },
+    "has_sugar": {
+      "kind": "binary",
+      "accuracy": 0.8465,
+      "majority": 0.7171,
+      "gain": 0.1294,
+      "positive_rate": 0.2829
+    },
+    "has_aromatic_ring": {
+      "kind": "binary",
+      "accuracy": 0.8223,
+      "majority": 0.5942,
+      "gain": 0.2281,
+      "positive_rate": 0.5942
+    },
+    "n_heavy_atoms": {
+      "kind": "count",
+      "r2": 0.7313,
+      "correlation": 0.8552,
+      "mean": 46.36,
+      "mean_absolute_error": 8.956
+    },
+    "n_nitrogen": {
+      "kind": "count",
+      "r2": 0.8356,
+      "correlation": 0.9142,
+      "mean": 3.54,
+      "mean_absolute_error": 1.024
+    },
+    "n_oxygen": {
+      "kind": "count",
+      "r2": 0.6651,
+      "correlation": 0.8163,
+      "mean": 9.48,
+      "mean_absolute_error": 2.46
+    },
+    "n_sulfur": {
+      "kind": "count",
+      "r2": 0.6226,
+      "correlation": 0.7891,
+      "mean": 0.14,
+      "mean_absolute_error": 0.1
+    },
+    "n_rings": {
+      "kind": "count",
+      "r2": 0.6138,
+      "correlation": 0.7849,
+      "mean": 3.41,
+      "mean_absolute_error": 1.139
+    },
+    "n_aromatic_rings": {
+      "kind": "count",
+      "r2": 0.555,
+      "correlation": 0.7453,
+      "mean": 1.21,
+      "mean_absolute_error": 0.667
+    },
+    "n_amide": {
+      "kind": "count",
+      "r2": 0.8595,
+      "correlation": 0.9273,
+      "mean": 2.53,
+      "mean_absolute_error": 0.713
+    },
+    "n_ester": {
+      "kind": "count",
+      "r2": 0.2698,
+      "correlation": 0.5254,
+      "mean": 0.61,
+      "mean_absolute_error": 0.525
+    },
+    "n_rotatable": {
+      "kind": "count",
+      "r2": 0.6262,
+      "correlation": 0.7917,
+      "mean": 10.61,
+      "mean_absolute_error": 4.245
+    },
+    "mol_weight": {
+      "kind": "count",
+      "r2": 0.7333,
+      "correlation": 0.8563,
+      "mean": 654.88,
+      "mean_absolute_error": 126.364
+    }
+  }
+}

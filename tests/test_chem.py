@@ -149,3 +149,32 @@ def test_macrolactam_without_nitrogen_is_rejected():
     chain = chem.append_pks_unit(chain, "keto")
     with pytest.raises(chem.ChemError):
         chem.terminate(chain, "macrolactam")
+
+
+def test_macrolactone_policy_changes_the_ring_size():
+    # A chain with hydroxyls at both ends: closing onto the far one gives the
+    # bigger ring, which is what real macrolactones look like.
+    chain = chem.start_chain(ACETIC_ACID)
+    chain = chem.append_pks_unit(chain, "hydroxyl")
+    for _ in range(4):
+        chain = chem.append_pks_unit(chain, "alkyl")
+    chain = chem.append_pks_unit(chain, "hydroxyl")
+
+    def ring_size(policy):
+        product = chem.to_smiles(chem.terminate(chain, "macrolactone", lactone_policy=policy))
+        mol = Chem.MolFromSmiles(product)
+        rings = mol.GetRingInfo().AtomRings()
+        return max((len(r) for r in rings), default=0)
+
+    assert ring_size("largest") > ring_size("nearest")
+
+
+def test_macrolactone_default_is_the_largest_ring():
+    chain = chem.start_chain(ACETIC_ACID)
+    chain = chem.append_pks_unit(chain, "hydroxyl")
+    for _ in range(3):
+        chain = chem.append_pks_unit(chain, "alkyl")
+    chain = chem.append_pks_unit(chain, "hydroxyl")
+    default = chem.to_smiles(chem.terminate(chain, "macrolactone"))
+    largest = chem.to_smiles(chem.terminate(chain, "macrolactone", lactone_policy="largest"))
+    assert default == largest

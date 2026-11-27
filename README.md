@@ -287,6 +287,42 @@ Tanimoto of the committed prediction, in the order the work happened:
 | Release mechanism from a best-variant model | 0.189 | **no** |
 | \+ hydroxylation from P450 genes | 0.188 | **no** |
 
+### Ring sizes, and what the gene layout gives away
+
+Macrolactones were closing onto whichever hydroxyl sat nearest the acid, which
+is the smallest ring the chain allows. Real ones are much larger:
+
+| | median macrocycle | 10-90 percentile |
+|---|---|---|
+| MIBiG products | 17 | 12-29 |
+| closing onto the nearest hydroxyl | 10 | 8-17 |
+| **closing onto the furthest** | **18** | 9-32 |
+
+Closing onto the furthest hydroxyl lifted the mean Tanimoto from 0.195 to
+0.200 and the strict structure match from 0.434 to 0.460, and it succeeds more
+often, since very small rings frequently failed to sanitise at all.
+
+Whether a product is macrocyclic at all can be predicted from the cluster:
+0.819 against 0.613 for always answering no. The informative features are the
+expected ones — module count, thioesterase domains — but also how the genes
+are laid out: genes per kilobase, the median gap between them, the share of
+genes in an operon, and how often the strand changes. Using that prediction in
+place of the domain rule cut the losses against antiSMASH from 320 to 279.
+
+More broadly, a cluster says a good deal about its product without any
+chemistry being built at all:
+
+| Property | Score | Baseline | Typical error |
+|---|---|---|---|
+| amide count | R² 0.86 | — | 0.7 |
+| nitrogen count | R² 0.84 | — | 1.0 |
+| molecular weight | R² 0.73 | — | 126 Da of 655 |
+| heavy atoms | R² 0.73 | — | 9 of 46 |
+| ring count | R² 0.61 | — | 1.1 |
+| carries a sugar | 0.85 | 0.72 | — |
+| carries an aromatic ring | 0.82 | 0.59 | — |
+| is macrocyclic | 0.82 | 0.61 | — |
+
 ### What actually limits the prediction
 
 Taking our own module parse and replacing only the substrates with MIBiG's

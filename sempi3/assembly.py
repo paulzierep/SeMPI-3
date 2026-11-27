@@ -160,6 +160,7 @@ def assemble(
     honour_kr_activity: bool = False,
     honour_transator: bool = True,
     honour_non_elongating: bool = True,
+    lactone_policy: str = "largest",
 ) -> Prediction:
     """Build the backbone encoded by ``spec``.
 
@@ -180,6 +181,12 @@ def assemble(
             trans-AT modules.
         honour_non_elongating: Let a non-elongating ketosynthase skip the
             chain extension.
+        lactone_policy: Which hydroxyl a macrolactone closes onto.
+            ``largest`` gives the biggest ring the chain allows and is the
+            default: macrocycles in MIBiG products run 12 to 29 atoms with a
+            median of 17, and closing onto the nearest hydroxyl instead gave a
+            median of 10. ``target`` aims for a fixed size, ``nearest`` is the
+            old behaviour.
     """
     prediction = Prediction(bgc_id=spec.bgc_id, notes=list(spec.notes))
     if not spec.modules:
@@ -218,7 +225,7 @@ def assemble(
     prediction.n_modules = used
     for mode in _release_modes(spec, chain):
         try:
-            prediction.variants[mode] = to_smiles(terminate(chain, mode))
+            prediction.variants[mode] = to_smiles(terminate(chain, mode, lactone_policy=lactone_policy))
         except (ChemError, Exception) as exc:  # noqa: BLE001 - RDKit raises broadly
             prediction.notes.append(f"release {mode}: {exc}")
     if not prediction.variants:

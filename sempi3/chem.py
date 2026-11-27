@@ -341,7 +341,7 @@ def _set_beta_state(rw: Chem.RWMol, beta_idx: int, reduction_state: str) -> None
     rw.RemoveAtom(carbonyl_o)
 
 
-def terminate(chain: Chain, mode: str) -> Chem.Mol:
+def terminate(chain: Chain, mode: str, lactone_policy: str = "largest") -> Chem.Mol:
     """Release the finished chain from the assembly line.
 
     Args:
@@ -357,7 +357,7 @@ def terminate(chain: Chain, mode: str) -> Chem.Mol:
         o_idx = _tagged_index(rw, TAG_CARBOXYL_O)
         rw.RemoveAtom(o_idx)
     elif mode in ("macrolactam", "macrolactone"):
-        _cyclise(rw, mode)
+        _cyclise(rw, mode, policy=lactone_policy)
     else:
         raise ChemError(f"unknown release mode: {mode!r}")
     mol = _finalise(rw)
@@ -371,7 +371,7 @@ def terminate(chain: Chain, mode: str) -> Chem.Mol:
 TAG_CYCLISATION_PARTNER = 7
 
 
-def _cyclise(rw: Chem.RWMol, mode: str) -> None:
+def _cyclise(rw: Chem.RWMol, mode: str, policy: str = "largest") -> None:
     rw.UpdatePropertyCache(strict=False)
     c_idx = _tagged_index(rw, TAG_CARBOXYL_C)
     if mode == "macrolactam":
@@ -379,7 +379,7 @@ def _cyclise(rw: Chem.RWMol, mode: str) -> None:
         if partner is None:
             raise ChemError("no N-terminus to cyclise onto")
     else:
-        partner_idx = _last_free_hydroxyl(rw, exclude=c_idx)
+        partner_idx = _last_free_hydroxyl(rw, exclude=c_idx, policy=policy)
         if partner_idx is None:
             raise ChemError("no free hydroxyl to cyclise onto")
         partner = rw.GetAtomWithIdx(partner_idx)
@@ -395,10 +395,15 @@ def _cyclise(rw: Chem.RWMol, mode: str) -> None:
     rw.GetAtomWithIdx(partner_idx).SetAtomMapNum(0)
 
 
-def _last_free_hydroxyl(rw: Chem.RWMol, exclude: int) -> Optional[int]:
-    """Index of the free hydroxyl furthest along the chain, if any."""
+#: Macrocycles in MIBiG products run from about 12 to 29 atoms, with a median
+#: of 17. A lactone is therefore placed to give a ring in that range rather
+#: than onto whichever hydroxyl happens to sit nearest the acid.
+TARGET_RING_SIZE = 16
+
+
+def _free_hydroxyls(rw: Chem.RWMol, exclude: int) -> list:
     rw.UpdatePropertyCache(strict=False)
-    best = None
+    found = []
     for atom in rw.GetAtoms():
         if atom.GetSymbol() != "O" or atom.GetTotalNumHs() != 1:
             continue
@@ -407,8 +412,49 @@ def _last_free_hydroxyl(rw: Chem.RWMol, exclude: int) -> Optional[int]:
         neighbours = list(atom.GetNeighbors())
         if len(neighbours) != 1 or neighbours[0].GetIdx() == exclude:
             continue
-        best = atom.GetIdx()
-    return best
+        found.append(atom.GetIdx())
+    return found
+
+
+def _ring_size(rw: Chem.RWMol, start: int, end: int) -> Optional[int]:
+    """Atoms in the ring that closing a bond between two atoms would make."""
+    from collections import deque
+
+    queue = deque([(start, 1)])
+    seen = {start}
+    while queue:
+        index, distance = queue.popleft()
+        if index == end:
+            return distance
+        for neighbour in rw.GetAtomWithIdx(index).GetNeighbors():
+            if neighbour.GetIdx() not in seen:
+                seen.add(neighbour.GetIdx())
+                queue.append((neighbour.GetIdx(), distance + 1))
+    return None
+
+
+def _last_free_hydroxyl(
+    rw: Chem.RWMol, exclude: int, policy: str = "largest", target: int = TARGET_RING_SIZE
+) -> Optional[int]:
+    """Pick the hydroxyl a macrolactone should close onto.
+
+    ``nearest`` takes the hydroxyl furthest along the atom ordering, which is
+    the one closest to the acid and gives the smallest ring. ``largest`` takes
+    the one giving the biggest ring. ``target`` aims for a ring of about
+    :data:`TARGET_RING_SIZE` atoms, which is where real macrolactones sit.
+    """
+    candidates = _free_hydroxyls(rw, exclude)
+    if not candidates:
+        return None
+    if policy == "nearest":
+        return candidates[-1]
+    sized = [(index, _ring_size(rw, exclude, index)) for index in candidates]
+    sized = [(index, size) for index, size in sized if size]
+    if not sized:
+        return candidates[-1]
+    if policy == "largest":
+        return max(sized, key=lambda item: item[1])[0]
+    return min(sized, key=lambda item: abs(item[1] - target))[0]
 
 
 def to_smiles(mol: Chem.Mol) -> str:
