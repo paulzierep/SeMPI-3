@@ -62,12 +62,6 @@ def render(summary: dict) -> str:
                 f"{data['sempi3_antismash']:.3f} | {data['sempi3_mibig']:.3f} |"
             )
 
-    lines += [
-        "",
-        "Tanimoto is low for every arm in absolute terms, which is expected: all three "
-        "predict a *backbone*, while the reference is the finished, tailored natural "
-        "product. The comparison between arms is the meaningful part.",
-    ]
     return "\n".join(lines)
 
 

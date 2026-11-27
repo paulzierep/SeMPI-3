@@ -7,8 +7,8 @@
       "tanimoto_median": 0.1111,
       "tanimoto_ge_0.4": 56,
       "tanimoto_ge_0.6": 14,
-      "coverage_pred_mean": 0.4248,
-      "strict_coverage_pred_mean": 0.3887,
+      "coverage_pred_mean": 0.4251,
+      "strict_coverage_pred_mean": 0.3891,
       "substructure_match_rate": 0.0246
     },
     "sempi3_antismash": {
@@ -17,8 +17,8 @@
       "tanimoto_median": 0.1541,
       "tanimoto_ge_0.4": 159,
       "tanimoto_ge_0.6": 42,
-      "coverage_pred_mean": 0.5319,
-      "strict_coverage_pred_mean": 0.4537,
+      "coverage_pred_mean": 0.5325,
+      "strict_coverage_pred_mean": 0.4542,
       "substructure_match_rate": 0.0235
     },
     "sempi3_antismash_oracle": {
@@ -27,8 +27,8 @@
       "tanimoto_median": 0.1795,
       "tanimoto_ge_0.4": 241,
       "tanimoto_ge_0.6": 82,
-      "coverage_pred_mean": 0.6001,
-      "strict_coverage_pred_mean": 0.5219,
+      "coverage_pred_mean": 0.6004,
+      "strict_coverage_pred_mean": 0.5222,
       "substructure_match_rate": 0.037
     },
     "sempi3_mibig": {
@@ -37,8 +37,8 @@
       "tanimoto_median": 0.1967,
       "tanimoto_ge_0.4": 131,
       "tanimoto_ge_0.6": 43,
-      "coverage_pred_mean": 0.584,
-      "strict_coverage_pred_mean": 0.5325,
+      "coverage_pred_mean": 0.5844,
+      "strict_coverage_pred_mean": 0.5332,
       "substructure_match_rate": 0.0294
     }
   },

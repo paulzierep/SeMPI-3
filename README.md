@@ -1,40 +1,128 @@
 # SeMPI-3
 
-Predict the chemical structure of a secondary metabolite from the composition
-and order of the genes in its biosynthetic gene cluster (BGC).
+Predict the structure of a secondary metabolite from its biosynthetic gene
+cluster. SeMPI-3 reads an **antiSMASH** annotation, cuts the assembly line into
+modules, and builds the product with **RDKit**.
 
-SeMPI-3 reads an **antiSMASH** annotation, cuts the assembly line into modules,
-and builds the product backbone atom by atom with **RDKit**. Predictions are
-benchmarked against the curated structures in **MIBiG 4.0**, with antiSMASH's
-own structure prediction as the baseline to beat.
-
-Scope: modular type-I **PKS**, **NRPS** and PKS/NRPS hybrids — the systems whose
-product can be read off the domain order.
-
-On the MIBiG benchmark, given the same antiSMASH input, SeMPI-3's structures
-are closer to the real product than antiSMASH's own prediction on 864 of
-1,161 clusters.
-
-> Status: early but usable. `sempi3 run` works on any antiSMASH GenBank file.
-> The chemistry and the benchmark are solid; the substrate model is a
-> nearest-pocket matcher rather than something learned. See [Roadmap](#roadmap).
+Scope: modular type-I **PKS**, **NRPS** and their hybrids. Given the same
+antiSMASH annotation, SeMPI-3 is closer to the real product than antiSMASH's
+own prediction on **881 of 1,216 clusters** (mean Tanimoto 0.204 against
+0.146 over everything, 0.214 over the clusters that are in scope, measured on
+MIBiG 4.0).
 
 ## Install
 
 ```bash
+git clone https://github.com/paulzierep/SeMPI-3.git
+cd SeMPI-3
 conda env create -f environment.yml
 conda activate sempi3
 pip install -e .
 ```
 
-antiSMASH is **not** a dependency. SeMPI-3 reads antiSMASH *output*, and MIBiG
-publishes that output for every entry, so nothing has to be installed or run.
+Nothing else is needed to predict: the binding-pocket table and the profile it
+is read with ship inside the package. antiSMASH is **not** a dependency —
+SeMPI-3 reads its *output*. HMMER is optional but recommended
+(`conda install -c bioconda hmmer`); with `hmmalign` available the binding
+pocket is read against a profile, which is more reliable on unusual domains.
+
+## Run
+
+Run antiSMASH however you normally do, then point SeMPI-3 at the GenBank file
+it wrote. A genome-wide run holds many regions; each is predicted separately.
+
+```bash
+sempi3 run region001.gbk                     # report: structure, modules, antiSMASH's own call
+sempi3 run region001.gbk --format tabular    # one row per region, for a workflow
+sempi3 run region001.gbk --format smiles     # just the SMILES
+sempi3 run region001.gbk --format json --out prediction.json
+sempi3 run region001.gbk --no-tailoring      # the bare backbone, undecorated
+```
+
+What a report looks like:
+
+```text
+BGC0000290_region1  products=NRPS|T3PKS  modules=7
+   0 nrps Dhpg
+   1 nrps Tyr                        E        <- epimerase: a D residue
+   2 nrps Hpg                        E
+   ...
+substrates named by the pocket model: 1
+tailoring enzymes: {'halogenase': 2, 'hydroxylase': 4}
+release: macrolactam
+SeMPI-3:   O=C1N[C@@H](c2ccc(O)cc2Cl)C(=O)N[C@@H](c2cc(O)cc(O)c2)...
+antiSMASH: NC(c1ccc(O)cc1)C(=O)NC(Cc1ccc(O)cc1)C(=O)NC(c1cc(O)cc(O)c1)...
+```
+
+The two predictions differ in ways worth reading: ours closes the macrolactam
+(`O=C1N...N[C@H]1`), carries the chlorine the cluster's halogenases imply, and
+keeps the stereochemistry the epimerase domains set. antiSMASH leaves the
+chain linear, flat and undecorated.
+
+A cluster whose product does not come off an assembly line — an iterative or
+type III synthase — is flagged rather than mispredicted.
+
+## Update
+
+Everything the tool ships with is derived from public data, so a new release
+of MIBiG or PARAS is absorbed by rebuilding rather than retraining:
+
+```bash
+./scripts/fetch_data.sh        # ~95 MB download, ~400 MB on disk
+sempi3 build-reference         # rebuild the binding-pocket table
+sempi3 train                   # rebuild the table the ranking models fit from
+pytest -q && sempi3 benchmark  # check nothing regressed
+```
+
+There are no model files. The one fitted component is trained from a packaged
+table the first time it is needed, so nothing is pinned to a scikit-learn
+version.
+
+## Results
+
+<!-- RESULTS:START -->
+Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known structure).
+
+| Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
+|---|---|---|---|---|---|---|
+| antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
+| SeMPI-3 from antiSMASH | 1406 | 0.204 | 0.154 | 159 | 42 | 0.532 |
+| SeMPI-3 from MIBiG modules | 578 | 0.270 | 0.197 | 131 | 43 | 0.584 |
+
+**Head to head against antiSMASH**, on clusters where both made a prediction:
+
+| Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
+|---|---|---|---|---|---|
+| SeMPI-3 from antiSMASH | 1216 | 881 | 8 | 327 | +0.073 |
+| SeMPI-3 from MIBiG modules | 536 | 375 | 4 | 157 | +0.095 |
+
+**Mean Tanimoto by cluster class:**
+
+| Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |
+|---|---|---|---|---|
+| NRPS_only | 469 | 0.219 | 0.301 | 0.339 |
+| PKS_only | 677 | 0.091 | 0.139 | 0.139 |
+| hybrid | 375 | 0.136 | 0.217 | 0.233 |
+<!-- RESULTS:END -->
+
+![Benchmark quality](docs/figures/quality.png)
+
+![Head to head against antiSMASH](docs/figures/head_to_head.png)
+
+![Similarity by cluster class](docs/figures/by_class.png)
+
+![What a cluster reveals about its product](docs/figures/properties.png)
+
+Scores are low in absolute terms for every tool here, because all of them
+predict a *backbone* while the reference is the finished, tailored natural
+product. The comparison between them is the meaningful part.
+
+---
 
 ## Data
 
-```bash
-./scripts/fetch_data.sh      # ~95 MB download, ~400 MB on disk
-```
+Only needed to rebuild the packaged tables or to run the benchmark; predicting
+needs none of it.
 
 | File | Size | What it gives |
 |---|---|---|
@@ -42,7 +130,9 @@ publishes that output for every entry, so nothing has to be installed or run.
 | `mibig_antismash_4.0_gbk_as8b1.tar.bz2` | 64 MB | antiSMASH 8 output per entry: domains, substrates, baseline SMILES |
 | PARAS database files | 300 kB | 3,653 curated A-domain substrates with binding-pocket signatures ([PARAS](https://github.com/BTheDragonMaster/parasect), CC BY 4.0) |
 
-Optional, and fetched by hand because the publisher blocks automated requests:
+One more source, fetched by hand because the publisher blocks automated
+requests, and **not** used by the shipped tool — adding it made substrate
+prediction worse (0.638 to 0.619), which is recorded below:
 `A_domains.csv` from the [SeMPI 2.0 supplement](https://www.mdpi.com/2218-1989/11/1/13/s1)
 (Zierep et al., *Metabolites* 2020, CC BY). It lists 2,868 A domains, 1,546 of
 them from Prieto et al. and keyed by UniProt accession rather than by cluster.
@@ -59,85 +149,22 @@ signatures that `scripts/experiment_substrates.py` can train on.
 Of 3,013 MIBiG entries, **1,457** are PKS/NRPS with both a known structure and
 an antiSMASH annotation. That is the benchmark set.
 
-## Use
-
-**Downstream of antiSMASH, on any genome.** Run antiSMASH, then point SeMPI-3
-at the GenBank file it wrote:
-
-```bash
-sempi3 run region001.gbk                  # structure, modules, antiSMASH's own call
-sempi3 run region001.gbk --format smiles  # just the SMILES, for a pipeline
-sempi3 run region001.gbk --format json --out prediction.json
-sempi3 run region001.gbk --no-tailoring   # the bare backbone
-```
-
-```text
-BGC0000290  products=NRPS|T3PKS  modules=7
-   0 nrps Dhpg
-   1 nrps Tyr                       E
-   ...
-tailoring enzymes: {'halogenase': 2, 'hydroxylase': 4}
-release: macrolactam
-SeMPI-3:   O=C1N[C@@H](c2ccc(O)cc2Cl)C(=O)N[C@@H](c2cc(O)cc(O)c2)...
-antiSMASH: NC(c1ccc(O)cc1)C(=O)NC(Cc1ccc(O)cc1)C(=O)NC(c1cc(O)cc(O)c1)...
-```
-
-A genome-wide antiSMASH run puts many regions in one file; each is treated as
-its own assembly line and gets its own row. `--format tabular` is the one to
-use in a workflow:
-
-```text
-region              products  modules  substrates_predicted  release       smiles          antismash_smiles
-contig1_region3     NRPS      7        2                     macrolactam   O=C1N[C@@H]...  NC(c1ccc(O)...
-```
-
-No extra files are needed: the binding-pocket reference that names the
-substrates antiSMASH leaves unnamed ships inside the package (162 kB).
-
-### Keeping it current
-
-The reference is a derived file, not a trained model, so a new release of
-MIBiG is absorbed by fetching it and rebuilding:
-
-```bash
-./scripts/fetch_data.sh                 # point it at the new release
-sempi3 build-reference                  # rewrites sempi3/data/substrate_signatures.tsv
-pytest -q && sempi3 benchmark           # check nothing regressed
-```
-
-`build-reference` takes `--json-dir`, `--antismash-dir` and `--paras`, so any
-collection of curated domains can be folded in. Today's table holds 3,980
-signatures from 2,575 MIBiG domains and 3,653 PARAS rows.
-
-A note on where the pocket positions came from: they were recovered from the
-PARAS data by alignment rather than copied from a paper, and PARAS later
-turned out to publish its own per-domain positions. Ours reproduce their
-signatures residue for residue 91.5% of the time, against 80.1% for the
-obvious alternative numbering, so the recovery was sound.
-
-**Working against MIBiG**, for development and benchmarking:
-
-```bash
-sempi3 predict BGC0000290              # predict one MIBiG cluster
-sempi3 predict BGC0000290 --show-variants
-sempi3 spec BGC0000001                 # the parsed assembly line, as JSON
-sempi3 benchmark --workers 8           # score every arm over MIBiG
-```
-
 ## How it works
 
 ```mermaid
 flowchart TD
     MIBIG[("MIBiG 4.0<br/>3,013 curated clusters")]
     AS[("antiSMASH 8 output<br/>published by MIBiG")]
-    PARAS[("PARAS<br/>2,873 curated A domains")]
+    PARAS[("PARAS<br/>3,653 curated A domains")]
 
     AS --> PARSE["Read aSDomain features<br/>order by gene, then by position"]
     PARSE --> MOD["Cut into modules<br/>a ketosynthase starts a PKS module<br/>an adenylation domain starts an NRPS module"]
 
-    MOD --> Q{"Did antiSMASH name<br/>the substrate?"}
+    MOD --> SCOPE{"A modular<br/>assembly line?"}
+    SCOPE -- "no: iterative or type III" --> FLAG(["Reported, flagged,<br/>not built"])
+    SCOPE -- yes --> Q{"Did antiSMASH name<br/>the substrate?"}
     Q -- "yes, 83%" --> SUB["Use its call"]
-    Q -- "no, 17%" --> POCKET["Binding-pocket model<br/>34 residues read against GrsA<br/>matched to curated domains"]
+    Q -- "no, 17%" --> POCKET["Binding-pocket lookup<br/>34 residues read by profile HMM<br/>matched to 4,562 curated signatures"]
     PARAS --> POCKET
     MIBIG --> POCKET
     POCKET --> SUB
@@ -145,7 +172,8 @@ flowchart TD
     SUB --> BUILD["Grow the chain in RDKit<br/>amide bonds, polyketide units,<br/>KR/DH/ER set the beta carbon,<br/>Cy domains close thiazolines"]
     BUILD --> REL["Release the chain<br/>hydrolysis, reduction,<br/>macrolactam or macrolactone"]
     REL --> TAIL["Decorate from the cluster's enzymes<br/>sugar, methyl, halogen"]
-    TAIL --> PRED(["Predicted structure"])
+    TAIL --> RANK["Rank the candidates against<br/>the product the cluster predicts:<br/>size, nitrogens, rings, sugar"]
+    RANK --> PRED(["Predicted structure"])
 
     PRED --> SCORE["Score four ways:<br/>fingerprint similarity,<br/>common substructure loose and strict,<br/>containment"]
     MIBIG --> TRUTH(["Known structure"])
@@ -158,7 +186,8 @@ flowchart TD
     classDef out fill:#00b894,stroke:#00866a,color:#ffffff
     class MIBIG,AS,PARAS data
     class PARSE,MOD,SUB,POCKET,BUILD,REL,TAIL,SCORE step
-    class PRED,TRUTH,ASBASE out
+    class RANK step
+    class PRED,TRUTH,ASBASE,FLAG out
 ```
 
 The numbered walk-through:
@@ -166,7 +195,11 @@ The numbered walk-through:
 1. **Parse** (`antismash_io.py`) — read `aSDomain` features from the antiSMASH
    GenBank, order them by gene and position in the protein, and cut them into
    modules: a new PKS module at every ketosynthase, a new NRPS module at every
-   adenylation domain. Substrates come from the `substrate consensus` qualifier.
+   adenylation domain. Substrates come from the `substrate consensus`
+   qualifier, loading domains from their own call. A cluster whose product
+   does not come off an assembly line at all — an iterative or type III
+   synthase — is flagged rather than built, because its module count says
+   nothing about the size of its product.
 2. **Assemble** (`assembly.py`, `chem.py`) — grow the chain as a real molecule:
    - NRPS modules form an amide bond with their amino acid;
    - heterocyclisation (Cy) domains close the residue into a thiazoline
@@ -178,12 +211,16 @@ The numbered walk-through:
      macrolactonisation.
    Tailoring enzymes found in the cluster then decorate the backbone
    (`tailoring.py`): a sugar, a halogen or a methyl group, one each at most.
-3. **Fill the gaps** (`stachelhaus.py`, `substrates.py`) — antiSMASH reports
-   no substrate for about one adenylation domain in six. Those domains are
-   given one by reading their binding-pocket residues and matching them
-   against curated domains from MIBiG and PARAS. antiSMASH's own calls are
-   never overridden.
-4. **Compare** (`compare.py`) — score the prediction against the known
+3. **Fill the gaps** (`hmm_align.py`, `predictor.py`) — antiSMASH reports no
+   substrate for about one adenylation domain in six. Those domains are given
+   one by reading their 34 binding-pocket residues — against a profile HMM
+   where HMMER is available, otherwise by pairwise alignment — and matching
+   them to 4,562 curated signatures from MIBiG and PARAS. antiSMASH's own
+   calls are never overridden.
+4. **Choose** (`ranking.py`) — several structures can be built from one
+   cluster. Rather than picking by rule, the cluster is asked what its product
+   should look like, and the candidate closest to that description is kept.
+5. **Compare** (`compare.py`) — score the prediction against the known
    structure four ways, because no single number says whether a backbone is
    right:
 
@@ -233,44 +270,6 @@ Two caveats, stated plainly:
   Tanimoto). A cluster often makes several congeners, so the best-matching
   compound is still taken for every arm alike; the chosen compound is recorded
   in the results table.
-
-## Results
-
-Benchmark over the MIBiG 4.0 PKS/NRPS set. Numbers are regenerated by
-`sempi3 benchmark`; the table below is filled in from `results/benchmark.summary.json`.
-
-![Benchmark quality](docs/figures/quality.png)
-
-![Head to head against antiSMASH](docs/figures/head_to_head.png)
-
-![Similarity by cluster class](docs/figures/by_class.png)
-
-<!-- RESULTS:START -->
-Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known structure).
-
-| Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
-|---|---|---|---|---|---|---|
-| antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
-| SeMPI-3 from antiSMASH | 1400 | 0.204 | 0.154 | 156 | 44 | 0.531 |
-| SeMPI-3 from MIBiG modules | 578 | 0.270 | 0.197 | 131 | 43 | 0.584 |
-
-**Head to head against antiSMASH**, on clusters where both made a prediction:
-
-| Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
-|---|---|---|---|---|---|
-| SeMPI-3 from antiSMASH | 1212 | 877 | 7 | 328 | +0.072 |
-| SeMPI-3 from MIBiG modules | 536 | 375 | 4 | 157 | +0.095 |
-
-**Mean Tanimoto by cluster class:**
-
-| Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |
-|---|---|---|---|---|
-| NRPS_only | 469 | 0.219 | 0.301 | 0.339 |
-| PKS_only | 677 | 0.091 | 0.137 | 0.139 |
-| hybrid | 375 | 0.136 | 0.217 | 0.233 |
-
-Tanimoto is low for every arm in absolute terms, which is expected: all three predict a *backbone*, while the reference is the finished, tailored natural product. The comparison between arms is the meaningful part.
-<!-- RESULTS:END -->
 
 ## What was tried, and what it was worth
 
@@ -414,34 +413,71 @@ Ordered by what the measurements say is worth doing, not by what is
 interesting to build:
 
 1. **Better substrates, and nothing else first.** Correct monomers are worth
-   +0.031 on their own, which is more than everything else tried put
-   together. antiSMASH is right 78.6% of the time when it commits to a call,
-   so the target is beating those calls rather than only filling the gaps our
-   pocket model fills now.
-2. **Extender units for polyketides.** MIBiG curates no acyltransferase
-   substrates at all and antiSMASH offers little beyond malonyl and
-   methylmalonyl, which is part of why PKS trails NRPS (0.128 against 0.302).
-3. **Where tailoring acts**, rather than only which enzymes are present.
-4. **A generative block model worth the name.** `blocks.py` already defines
-   the token language and guarantees that any sequence assembles; what is
-   missing is a sequence model trained on honest splits, which wants a GPU
-   and more data than MIBiG alone provides.
+   +0.031 on their own, more than everything else tried put together.
+   antiSMASH is right 78.6% of the time when it commits, so the target is
+   beating those calls rather than only filling the gaps.
+2. **Where tailoring acts**, rather than only which enzymes are present. The
+   annotation names the enzyme but never the site, and a guessed site is worth
+   little: glycosylation gains 0.0015 and hydroxylation loses 0.0035.
+3. **Learn from trans-AT.** Those clusters score best of any subtype (0.231
+   against antiSMASH's 0.098), because antiSMASH's transATor call states the
+   oxidation level outright. Nothing else gets that kind of evidence, and it
+   is worth asking what would.
+4. **Iterative synthases**, which are flagged and skipped today. Predicting
+   how many times a module fires is a different problem from reading an
+   assembly line, and 148 clusters in the benchmark need it.
+5. **A generative block model worth the name.** `blocks.py` defines the token
+   language and guarantees any sequence assembles; what is missing is a
+   sequence model trained on honest splits, which wants a GPU and more data
+   than MIBiG alone provides.
+
+What is *not* worth doing, because it was tried and measured: extender-unit
+prediction for polyketides (antiSMASH's calls are worth +0.007 over assuming
+malonyl), release-mechanism models, module-skipping models, and copying the
+nearest cluster's structure.
 
 ## Development
 
 ```bash
-pytest -q                                  # unit tests, no data needed
+pytest -q                                      # 112 tests, no downloaded data needed
 ruff check sempi3 tests && black --check sempi3 tests
 ```
 
-Tests cover the chemistry primitives against independently written reference
-SMILES and CIP codes, the assembly rules, and both parsers.
+The tests cover the chemistry primitives against independently written
+reference SMILES and CIP codes, the assembly rules, both parsers, the
+binding-pocket reader and the ranking models.
+
+The experiments behind the claims in this README live in `scripts/`, each
+runnable on its own and each writing its report to `results/`:
+
+| Script | Question it answers |
+|---|---|
+| `experiment_substrates.py` | which substrate predictor is best, and does more data help |
+| `experiment_release.py` | can the release mechanism be learned |
+| `experiment_blocks.py` | can building blocks be generated from the cluster |
+| `experiment_module_skip.py` | should any detected module be dropped |
+| `experiment_structure_features.py` | what does a cluster reveal about its product |
+| `experiment_rank.py` | does ranking candidates beat choosing by rule |
+| `experiment_retrieval.py` | how much of a lookalike score is just near-duplicate clusters |
+| `predict_substrate_fill.py` | out-of-fold substrate calls for the benchmark |
 
 ## Background
 
 SeMPI-3 follows [SeMPI](https://academic.oup.com/nar/article/44/W1/W510/2499349)
-and SeMPI 2.0, which predicted PKS/NRPS products and screened them against
-natural-product databases.
+and [SeMPI 2.0](https://doi.org/10.3390/metabo11010013), which predicted
+PKS/NRPS products and screened them against natural-product databases.
+
+It is built on data from other people's work:
+
+* **MIBiG 4.0** — curated gene clusters and the structures they make.
+* **antiSMASH 8** — the domain annotation every prediction starts from, and
+  the baseline every result is measured against. MIBiG publishes its output
+  for every entry, so antiSMASH itself is not a dependency.
+* **PARAS/PARASECT** ([Terlouw et al.](https://www.biorxiv.org/content/10.1101/2025.01.08.631717v2.full),
+  CC BY 4.0) — 3,653 curated adenylation-domain substrates, their binding-pocket
+  signatures, structures for several hundred unusual monomers, and the Pfam
+  AMP-binding profile used to read a pocket. Their data is used; their code,
+  which is AGPL, is not.
 
 ## License
 
