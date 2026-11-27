@@ -173,6 +173,7 @@ def main() -> int:
     parser.add_argument("--folds", type=int, default=5)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--seed", type=int, default=0)
+    parser.add_argument("--novelty", action="store_true", help="also measure distance to known structures")
     args = parser.parse_args()
 
     rows, clusters = collect(args.limit)
@@ -220,6 +221,8 @@ def main() -> int:
     changed_structures = 0
     scored_rule: List[float] = []
     scored_model: List[float] = []
+    backbone_rule: List[float] = []
+    backbone_model: List[float] = []
     novelty: List[float] = []
     training_structures = [data["structures"][0] for data in clusters.values()]
 
@@ -243,9 +246,17 @@ def main() -> int:
             scored_model.append(tuned_score.tanimoto)
             if base.smiles != tuned.smiles:
                 changed_structures += 1
+            # The same pair, scored against the reference with its sugars and
+            # halogens stripped off, which is closer to what was predicted.
+            reference = data["structures"][0]
+            base_backbone = compare.backbone_tanimoto(base.smiles, reference)
+            tuned_backbone = compare.backbone_tanimoto(tuned.smiles, reference)
+            if base_backbone is not None and tuned_backbone is not None:
+                backbone_rule.append(base_backbone)
+                backbone_model.append(tuned_backbone)
         # How close is the prediction to the nearest known structure? A model
         # that recalls a neighbour shows up here.
-        if tuned.smiles:
+        if args.novelty and tuned.smiles:
             best = 0.0
             predicted_mol = compare.parse(tuned.smiles)
             if predicted_mol is not None:
@@ -269,13 +280,19 @@ def main() -> int:
         "structures_changed_by_model": changed_structures,
         "mean_tanimoto_rule": round(float(np.mean(scored_rule)), 4) if scored_rule else 0.0,
         "mean_tanimoto_learned": round(float(np.mean(scored_model)), 4) if scored_model else 0.0,
+        "mean_backbone_tanimoto_rule": round(float(np.mean(backbone_rule)), 4) if backbone_rule else 0.0,
+        "mean_backbone_tanimoto_learned": round(float(np.mean(backbone_model)), 4) if backbone_model else 0.0,
         "mean_similarity_to_nearest_known": round(float(np.mean(novelty)), 4) if novelty else 0.0,
     }
     print("\nstructures built from the learned blocks:")
     print(f"  domain rule : {report['mean_tanimoto_rule']:.4f}")
     print(f"  learned     : {report['mean_tanimoto_learned']:.4f}")
-    print(f"  mean similarity of a prediction to the nearest known structure: "
-          f"{report['mean_similarity_to_nearest_known']:.3f}")
+    print("\nagainst the reference with sugars and halogens stripped:")
+    print(f"  domain rule : {report['mean_backbone_tanimoto_rule']:.4f}")
+    print(f"  learned     : {report['mean_backbone_tanimoto_learned']:.4f}")
+    if args.novelty:
+        print(f"  mean similarity of a prediction to the nearest known structure: "
+              f"{report['mean_similarity_to_nearest_known']:.3f}")
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(report, indent=2) + "\n")
     print(f"\nwrote {OUT}")

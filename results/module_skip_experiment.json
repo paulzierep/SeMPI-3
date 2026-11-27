@@ -1,0 +1,11 @@
+{
+  "modules": 3989,
+  "clusters": 548,
+  "keep_accuracy": 0.7771,
+  "always_keep_accuracy": 0.8067,
+  "structures_compared": 507,
+  "structures_changed": 236,
+  "mean_tanimoto_before": 0.2554,
+  "mean_tanimoto_after": 0.2558,
+  "mean_similarity_to_nearest_known": 0.4384
+}

@@ -175,6 +175,38 @@ Tanimoto of the committed prediction, in the order the work happened:
 | Release mechanism from a best-variant model | 0.189 | **no** |
 | \+ hydroxylation from P450 genes | 0.188 | **no** |
 
+### What actually limits the prediction
+
+Taking our own module parse and replacing only the substrates with MIBiG's
+curated ones, over the 474 clusters that have both:
+
+| Assembly line | Mean Tanimoto |
+|---|---|
+| our modules, antiSMASH substrates | 0.251 |
+| our modules, **curated substrates** | **0.282** |
+| fully curated modules | 0.280 |
+
+Correct substrates recover the whole gap: our reading of the assembly line is
+already as good as the curation, and every remaining point is in *which
+monomer each module selects*. That one result explains why so much else made
+no difference, and it is where the work should go.
+
+Four learned models were trained and then left out, because each improved the
+chemistry without improving the structures:
+
+| Model | Its own accuracy | Effect on structures |
+|---|---|---|
+| Release mechanism, trained on structures | 0.753 against the rule's 0.284 | 0.186, worse than 0.192 |
+| Release mechanism, trained on best variant | 0.535 | 0.189, worse |
+| Beta-carbon oxidation state | 0.73 against the rule's 0.62 | unchanged, with 23 of 40 structures altered |
+| Which detected modules to skip | 0.777, below always-keep's 0.807 | unchanged |
+
+The oxidation-state model was also scored against the reference with its
+sugars and halogens stripped off (`compare.backbone_tanimoto`), in case the
+whole-molecule score was hiding the gain. It was not: 0.2071 against 0.2069.
+One oxygen among sixty atoms does not move a fingerprint, while the monomer a
+module picks moves several atoms at once.
+
 Two results are worth stating plainly because they are negative:
 
 - **A better release model made the structures worse.** A random forest picks
@@ -186,6 +218,13 @@ Two results are worth stating plainly because they are negative:
 - **Tailoring barely helps, and hydroxylation hurts.** The annotation says
   *which* enzyme a cluster encodes but never *where* it acts, so the site has
   to be guessed. Guessing costs more than it gains for hydroxyls.
+- **Copying the nearest cluster is not prediction.** Encoding every cluster as
+  a vector (`features.py`) and reporting the structure of its closest
+  neighbour scores 0.323, which looks better than anything here — until
+  neighbours above 0.9 similarity are excluded, when it falls to 0.161, below
+  the assembled prediction. MIBiG holds near-duplicate clusters, and retrieval
+  lives off them. For comparison, an assembled prediction sits 0.26 to 0.44
+  away from the nearest known structure: it is built, not recalled.
 
 ### Substrate prediction
 
@@ -214,14 +253,22 @@ which is what pins the numbering.
 
 ## Roadmap
 
-1. **Rule-based backbone with pocket-model substrates** — done, benchmarked above.
-2. **PKS is the weak class** (0.128 against antiSMASH's 0.091, while NRPS is
-   0.302 against 0.219): trans-AT handling, beta-branching, starter units
-   beyond acetyl, and KR stereochemistry.
-3. **Where tailoring acts**, rather than only which enzymes are present. This
-   is where most of the remaining difference to the true structure sits.
-4. **Retrieval baseline** — transfer the structure of the most similar known
-   cluster, as a sanity check that any learned model beats simple lookup.
+Ordered by what the measurements say is worth doing, not by what is
+interesting to build:
+
+1. **Better substrates, and nothing else first.** Correct monomers are worth
+   +0.031 on their own, which is more than everything else tried put
+   together. antiSMASH is right 78.6% of the time when it commits to a call,
+   so the target is beating those calls rather than only filling the gaps our
+   pocket model fills now.
+2. **Extender units for polyketides.** MIBiG curates no acyltransferase
+   substrates at all and antiSMASH offers little beyond malonyl and
+   methylmalonyl, which is part of why PKS trails NRPS (0.128 against 0.302).
+3. **Where tailoring acts**, rather than only which enzymes are present.
+4. **A generative block model worth the name.** `blocks.py` already defines
+   the token language and guarantees that any sequence assembles; what is
+   missing is a sequence model trained on honest splits, which wants a GPU
+   and more data than MIBiG alone provides.
 
 ## Development
 

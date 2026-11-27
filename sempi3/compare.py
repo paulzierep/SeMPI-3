@@ -64,6 +64,78 @@ class Similarity:
         return asdict(self)
 
 
+#: A pyranose or furanose ring, the usual glycosylation product.
+SUGAR_RING = Chem.MolFromSmarts("[OX2;R]1[CX4;R][CX4;R][CX4;R][CX4;R][CX4;R]1")
+SUGAR_RING_5 = Chem.MolFromSmarts("[OX2;R]1[CX4;R][CX4;R][CX4;R][CX4;R]1")
+
+#: Halogens added by tailoring enzymes.
+HALOGENS = (9, 17, 35, 53)
+
+
+def strip_tailoring(mol: Chem.Mol) -> Optional[Chem.Mol]:
+    """Remove sugars and halogens, leaving something closer to the backbone.
+
+    SeMPI-3 predicts the chain that comes off the assembly line, while the
+    reference is the finished natural product. Comparing the two directly
+    charges the prediction for every decoration added afterwards, which hides
+    whether the backbone itself got better. Stripping the most common
+    decorations off the *reference* makes the comparison answer the backbone
+    question instead.
+
+    This is deliberately crude: sugar rings and halogen atoms only. It is a
+    second view on the same prediction, never a replacement for the
+    whole-molecule score.
+    """
+    if mol is None:
+        return None
+    editable = Chem.RWMol(mol)
+    doomed = set()
+    for pattern in (SUGAR_RING, SUGAR_RING_5):
+        if pattern is None:
+            continue
+        for match in mol.GetSubstructMatches(pattern):
+            ring = set(match)
+            # Take the ring and whatever hangs off it that is not the aglycone:
+            # a sugar is attached through exactly one bond.
+            attachments = [
+                atom.GetIdx()
+                for index in ring
+                for atom in mol.GetAtomWithIdx(index).GetNeighbors()
+                if atom.GetIdx() not in ring
+            ]
+            linking = [a for a in attachments if mol.GetAtomWithIdx(a).GetDegree() > 1]
+            if len(linking) <= 1:
+                doomed |= ring
+                doomed |= {a for a in attachments if mol.GetAtomWithIdx(a).GetDegree() == 1}
+    for atom in mol.GetAtoms():
+        if atom.GetAtomicNum() in HALOGENS:
+            doomed.add(atom.GetIdx())
+    for index in sorted(doomed, reverse=True):
+        editable.RemoveAtom(index)
+    try:
+        stripped = editable.GetMol()
+        Chem.SanitizeMol(stripped)
+    except Exception:  # noqa: BLE001
+        return mol
+    fragments = Chem.GetMolFrags(stripped, asMols=True, sanitizeFrags=False)
+    if not fragments:
+        return mol
+    # Keep the largest piece: the aglycone.
+    return max(fragments, key=lambda f: f.GetNumHeavyAtoms())
+
+
+def backbone_tanimoto(pred_smiles: str, true_smiles: str) -> Optional[float]:
+    """Similarity against the reference with its decorations stripped off."""
+    pred = parse(pred_smiles)
+    true = parse(true_smiles)
+    if pred is None or true is None:
+        return None
+    core = strip_tailoring(true)
+    if core is None or core.GetNumHeavyAtoms() == 0:
+        return None
+    return tanimoto(pred, core)
+
+
 def parse(smiles: Optional[str]) -> Optional[Chem.Mol]:
     """Parse SMILES, returning ``None`` instead of raising."""
     if not smiles:
