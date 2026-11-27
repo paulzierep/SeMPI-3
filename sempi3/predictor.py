@@ -105,12 +105,28 @@ class ClusterPrediction:
         }
 
 
+def predict_all(
+    gbk_path: Path,
+    fill_substrates: bool = True,
+    apply_tailoring: bool = True,
+) -> List[ClusterPrediction]:
+    """Predict a product for every region in an antiSMASH GenBank file.
+
+    A genome-wide antiSMASH run puts many regions in one file; each is an
+    assembly line of its own and gets its own prediction.
+    """
+    return [
+        _predict_record(record, fill_substrates=fill_substrates, apply_tailoring=apply_tailoring)
+        for record in antismash_io.load_regions(Path(gbk_path))
+    ]
+
+
 def predict(
     gbk_path: Path,
     fill_substrates: bool = True,
     apply_tailoring: bool = True,
 ) -> ClusterPrediction:
-    """Predict the product of an antiSMASH-annotated cluster.
+    """Predict the product of a single-cluster antiSMASH file.
 
     Args:
         gbk_path: A GenBank file written by antiSMASH.
@@ -118,6 +134,10 @@ def predict(
         apply_tailoring: Decorate the backbone from the cluster's enzymes.
     """
     record = antismash_io.load(Path(gbk_path))
+    return _predict_record(record, fill_substrates=fill_substrates, apply_tailoring=apply_tailoring)
+
+
+def _predict_record(record, fill_substrates: bool, apply_tailoring: bool) -> ClusterPrediction:
     spec = record.spec
 
     filled = 0

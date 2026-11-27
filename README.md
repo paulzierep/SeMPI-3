@@ -82,8 +82,32 @@ SeMPI-3:   O=C1N[C@@H](c2ccc(O)cc2Cl)C(=O)N[C@@H](c2cc(O)cc(O)c2)...
 antiSMASH: NC(c1ccc(O)cc1)C(=O)NC(Cc1ccc(O)cc1)C(=O)NC(c1cc(O)cc(O)c1)...
 ```
 
+A genome-wide antiSMASH run puts many regions in one file; each is treated as
+its own assembly line and gets its own row. `--format tabular` is the one to
+use in a workflow:
+
+```text
+region              products  modules  substrates_predicted  release       smiles          antismash_smiles
+contig1_region3     NRPS      7        2                     macrolactam   O=C1N[C@@H]...  NC(c1ccc(O)...
+```
+
 No extra files are needed: the binding-pocket reference that names the
 substrates antiSMASH leaves unnamed ships inside the package (162 kB).
+
+### Keeping it current
+
+The reference is a derived file, not a trained model, so a new release of
+MIBiG is absorbed by fetching it and rebuilding:
+
+```bash
+./scripts/fetch_data.sh                 # point it at the new release
+sempi3 build-reference                  # rewrites sempi3/data/substrate_signatures.tsv
+pytest -q && sempi3 benchmark           # check nothing regressed
+```
+
+`build-reference` takes `--json-dir`, `--antismash-dir` and `--paras`, so any
+collection of curated domains can be folded in. Today's table holds 3,434
+signatures from 2,575 MIBiG domains and 2,873 PARAS rows.
 
 **Working against MIBiG**, for development and benchmarking:
 

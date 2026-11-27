@@ -20,8 +20,10 @@ from dataclasses import (
 from pathlib import Path
 from typing import (
     Dict,
+    Iterator,
     List,
     Optional,
+    Tuple,
 )
 
 from Bio import SeqIO
@@ -168,15 +170,27 @@ class _Domain:
     transator: Optional[str] = None
 
 
-def _collect_domains(record) -> List[_Domain]:
+def _within(feature, bounds: Optional[Tuple[int, int]]) -> bool:
+    """True when a feature lies inside the region being read."""
+    if bounds is None:
+        return True
+    start, end = bounds
+    return int(feature.location.start) >= start and int(feature.location.end) <= end
+
+
+def _collect_domains(record, bounds: Optional[Tuple[int, int]] = None) -> List[_Domain]:
     """Domains of one record, in assembly-line order.
 
     Order is gene order along the contig, then position within the protein,
-    which is the order antiSMASH itself assumes for modular systems.
+    which is the order antiSMASH itself assumes for modular systems. With
+    ``bounds`` only the domains of one region are taken, so a genome-wide
+    annotation does not collapse into a single assembly line.
     """
     domains: List[_Domain] = []
     for feature in record.features:
         if feature.type != "aSDomain":
+            continue
+        if not _within(feature, bounds):
             continue
         if feature.qualifiers.get("aSTool", [""])[0] != "nrps_pks_domains":
             continue
@@ -298,11 +312,16 @@ class _ModuleBuilder:
         return self.modules
 
 
-def parse_record(record, bgc_id: str) -> AntismashRecord:
-    """Turn one parsed GenBank record into a spec plus the antiSMASH baseline."""
+def parse_record(record, bgc_id: str, bounds: Optional[Tuple[int, int]] = None) -> AntismashRecord:
+    """Turn one parsed GenBank record into a spec plus the antiSMASH baseline.
+
+    ``bounds`` restricts the read to one region of the record.
+    """
     baseline: List[str] = []
     products: List[str] = []
     for feature in record.features:
+        if not _within(feature, bounds):
+            continue
         if feature.type == "cand_cluster":
             for raw in feature.qualifiers.get("SMILES", []):
                 cleaned = _clean_smiles(raw)
@@ -313,10 +332,14 @@ def parse_record(record, bgc_id: str) -> AntismashRecord:
 
     from .tailoring import detect as detect_tailoring
 
-    tailoring_genes = detect_tailoring(record).to_dict()
+    if bounds is None:
+        tailoring_genes = detect_tailoring(record).to_dict()
+    else:
+        inside = type("_Slice", (), {"features": [f for f in record.features if _within(f, bounds)]})()
+        tailoring_genes = detect_tailoring(inside).to_dict()
 
     builder = _ModuleBuilder()
-    for domain in _collect_domains(record):
+    for domain in _collect_domains(record, bounds):
         builder.add(domain)
     modules = builder.finish()
 
@@ -342,6 +365,33 @@ def parse_record(record, bgc_id: str) -> AntismashRecord:
         products=products,
         tailoring_genes=tailoring_genes,
     )
+
+
+def load_regions(path: Path) -> List[AntismashRecord]:
+    """Every biosynthetic region in a GenBank file, as its own cluster.
+
+    antiSMASH writes one file per region for a single cluster, but a
+    genome-wide run produces files holding many regions. Treating those as one
+    assembly line would be wrong, so each region is read separately. A file
+    with no region features is read whole, which covers MIBiG's own entries.
+    """
+    path = Path(path)
+    found: List[AntismashRecord] = []
+    for record in SeqIO.parse(str(path), "genbank"):
+        regions = [f for f in record.features if f.type == "region"]
+        if not regions:
+            parsed = parse_record(record, bgc_id=record.id or path.stem)
+            if parsed.spec.modules:
+                found.append(parsed)
+            continue
+        for feature in regions:
+            numbers = feature.qualifiers.get("region_number", [])
+            label = f"{record.id or path.stem}_region{numbers[0] if numbers else len(found) + 1}"
+            bounds = (int(feature.location.start), int(feature.location.end))
+            parsed = parse_record(record, bgc_id=label, bounds=bounds)
+            if parsed.spec.modules:
+                found.append(parsed)
+    return found
 
 
 def load(path: Path) -> AntismashRecord:

@@ -66,7 +66,13 @@ def predict(bgc_id: str, json_dir: Path, show_variants: bool) -> None:
 
 @cli.command("run")
 @click.argument("gbk", type=click.Path(exists=True, dir_okay=False, path_type=Path))
-@click.option("--format", "output_format", type=click.Choice(["text", "json", "smiles"]), default="text")
+@click.option(
+    "--format",
+    "output_format",
+    type=click.Choice(["text", "json", "smiles", "tabular"]),
+    default="text",
+    help="tabular is one row per region, for a workflow.",
+)
 @click.option("--no-fill", is_flag=True, help="Do not name the substrates antiSMASH left unnamed.")
 @click.option("--no-tailoring", is_flag=True, help="Report the bare backbone.")
 @click.option("--out", type=click.Path(path_type=Path), default=None, help="Write to a file.")
@@ -76,13 +82,54 @@ def run_on_file(gbk: Path, output_format: str, no_fill: bool, no_tailoring: bool
     This is the way to use SeMPI-3 downstream of antiSMASH: point it at a
     GenBank file antiSMASH wrote, for any genome.
     """
-    result = predictor.predict(gbk, fill_substrates=not no_fill, apply_tailoring=not no_tailoring)
+    results = predictor.predict_all(gbk, fill_substrates=not no_fill, apply_tailoring=not no_tailoring)
+    if not results:
+        click.echo("no PKS/NRPS assembly line found in this file", err=True)
+        raise SystemExit(0)
 
     if output_format == "json":
-        text = json.dumps(result.to_dict(), indent=2)
+        text = json.dumps([r.to_dict() for r in results], indent=2)
     elif output_format == "smiles":
-        text = f"{result.smiles}\t{result.bgc_id}"
+        text = "\n".join(f"{r.smiles}\t{r.bgc_id}" for r in results)
+    elif output_format == "tabular":
+        header = [
+            "region",
+            "products",
+            "modules",
+            "substrates_predicted",
+            "release",
+            "smiles",
+            "antismash_smiles",
+        ]
+        rows = ["\t".join(header)]
+        for r in results:
+            rows.append(
+                "\t".join(
+                    [
+                        r.bgc_id,
+                        "|".join(r.products) or "-",
+                        str(len(r.modules)),
+                        str(r.filled_substrates),
+                        r.release or "-",
+                        r.smiles or "-",
+                        r.antismash_smiles or "-",
+                    ]
+                )
+            )
+        text = "\n".join(rows)
     else:
+        text = "\n\n".join(_render(r) for r in results)
+
+    if out:
+        out.write_text(text + "\n")
+        click.echo(f"wrote {out}")
+    else:
+        click.echo(text)
+
+
+def _render(result) -> str:
+    """Human-readable report for one region."""
+    if True:
         lines = [
             f"{result.bgc_id}  products={'|'.join(result.products) or '-'}  modules={len(result.modules)}",
         ]
@@ -106,13 +153,41 @@ def run_on_file(gbk: Path, output_format: str, no_fill: bool, no_tailoring: bool
             lines.append(f"antiSMASH: {result.antismash_smiles}")
         for note in result.notes[:4]:
             lines.append(f"note: {note}")
-        text = "\n".join(lines)
+        return "\n".join(lines)
 
-    if out:
-        out.write_text(text + "\n")
-        click.echo(f"wrote {out}")
-    else:
-        click.echo(text)
+
+@cli.command("build-reference")
+@click.option(
+    "--json-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=DEFAULT_JSON_DIR,
+    show_default=True,
+    help="MIBiG entries, any release.",
+)
+@click.option(
+    "--antismash-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=DEFAULT_ANTISMASH_DIR,
+    show_default=True,
+)
+@click.option(
+    "--paras",
+    type=click.Path(exists=True, dir_okay=False, path_type=Path),
+    default=Path("data/external/paras/dataset_paras.tsv"),
+    show_default=True,
+    help="Optional extra set of curated domains.",
+)
+@click.option("--out", type=click.Path(path_type=Path), default=None, help="Where to write the table.")
+def build_reference(json_dir: Path, antismash_dir: Path, paras: Path, out: Path) -> None:
+    """Rebuild the substrate reference from the data currently on disk.
+
+    Run this after a new MIBiG release: fetch the data, then rebuild, and the
+    packaged table grows with it. Nothing else has to change.
+    """
+    from . import reference
+
+    path = reference.build(json_dir, antismash_dir, paras if paras and paras.exists() else None, out)
+    click.echo(f"wrote {path}")
 
 
 @cli.command("spec")
