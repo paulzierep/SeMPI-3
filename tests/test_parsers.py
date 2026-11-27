@@ -118,3 +118,68 @@ def test_mibig_modification_types_skip_inactive_domains():
         ]
     }
     assert mibig._modification_types(module) == ["ketoreductase"]
+
+
+def test_strict_mcs_notices_a_bond_order_difference():
+    # The loose search treats a single and a double bond as the same, so only
+    # the strict one can tell a saturated chain from an unsaturated one.
+    loose = compare.compare("CCCCCC(=O)O", "CC=CCCC(=O)O", strict=True, timeout=5)
+    assert loose is not None
+    assert loose.mcs_coverage_pred == pytest.approx(1.0)
+    assert loose.mcs_strict_coverage_pred < 1.0
+
+
+def test_strict_mcs_notices_an_oxidation_level():
+    score = compare.compare("CC(O)CC(=O)O", "CC(=O)CC(=O)O", strict=True, timeout=5)
+    assert score is not None
+    assert score.mcs_coverage_pred == pytest.approx(1.0)
+    assert score.mcs_strict_coverage_pred < 1.0
+
+
+def test_identical_molecules_match_on_every_measure():
+    score = compare.compare("CCCCCC(=O)O", "CCCCCC(=O)O", strict=True, timeout=5)
+    assert score is not None
+    assert score.tanimoto == pytest.approx(1.0)
+    assert score.mcs_strict_coverage_pred == pytest.approx(1.0)
+    assert score.substructure_match == pytest.approx(1.0)
+
+
+def test_substructure_match_finds_a_contained_backbone():
+    score = compare.compare("CCCC(=O)O", "CCCC(=O)OC", strict=True, timeout=5)
+    assert score is not None
+    assert score.substructure_match == pytest.approx(0.0) or score.mcs_strict_coverage_pred > 0.5
+
+
+def test_strip_tailoring_removes_a_sugar():
+    from rdkit import Chem
+
+    glycoside = Chem.MolFromSmiles("CC1OC(OC2CCCCC2)C(O)C(O)C1O")
+    stripped = compare.strip_tailoring(glycoside)
+    assert stripped is not None
+    assert Chem.MolToSmiles(stripped) == Chem.MolToSmiles(Chem.MolFromSmiles("OC1CCCCC1"))
+
+
+def test_strip_tailoring_removes_halogens():
+    from rdkit import Chem
+
+    chlorinated = Chem.MolFromSmiles("Clc1ccc(CCN)cc1")
+    stripped = compare.strip_tailoring(chlorinated)
+    assert stripped is not None
+    assert "Cl" not in Chem.MolToSmiles(stripped)
+
+
+def test_strip_tailoring_leaves_a_plain_molecule_alone():
+    from rdkit import Chem
+
+    plain = Chem.MolFromSmiles("CCCCC(=O)O")
+    stripped = compare.strip_tailoring(plain)
+    assert Chem.MolToSmiles(stripped) == Chem.MolToSmiles(plain)
+
+
+def test_backbone_tanimoto_ignores_the_decorations():
+    # The prediction is the aglycone; against the glycoside it scores poorly,
+    # but against the stripped reference it is perfect.
+    whole = compare.compare("OC1CCCCC1", "CC1OC(OC2CCCCC2)C(O)C(O)C1O", timeout=5)
+    backbone = compare.backbone_tanimoto("OC1CCCCC1", "CC1OC(OC2CCCCC2)C(O)C(O)C1O")
+    assert whole is not None and backbone is not None
+    assert backbone > whole.tanimoto

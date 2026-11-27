@@ -223,6 +223,8 @@ def main() -> int:
     scored_model: List[float] = []
     backbone_rule: List[float] = []
     backbone_model: List[float] = []
+    strict_rule: List[float] = []
+    strict_model: List[float] = []
     novelty: List[float] = []
     training_structures = [data["structures"][0] for data in clusters.values()]
 
@@ -254,6 +256,13 @@ def main() -> int:
             if base_backbone is not None and tuned_backbone is not None:
                 backbone_rule.append(base_backbone)
                 backbone_model.append(tuned_backbone)
+            # Bond orders must match here, so an oxidation level that is wrong
+            # costs something, which the fingerprint score barely registers.
+            base_strict = compare.compare(base.smiles, reference, timeout=3, strict=True)
+            tuned_strict = compare.compare(tuned.smiles, reference, timeout=3, strict=True)
+            if base_strict and tuned_strict:
+                strict_rule.append(base_strict.mcs_strict_coverage_pred)
+                strict_model.append(tuned_strict.mcs_strict_coverage_pred)
         # How close is the prediction to the nearest known structure? A model
         # that recalls a neighbour shows up here.
         if args.novelty and tuned.smiles:
@@ -282,11 +291,16 @@ def main() -> int:
         "mean_tanimoto_learned": round(float(np.mean(scored_model)), 4) if scored_model else 0.0,
         "mean_backbone_tanimoto_rule": round(float(np.mean(backbone_rule)), 4) if backbone_rule else 0.0,
         "mean_backbone_tanimoto_learned": round(float(np.mean(backbone_model)), 4) if backbone_model else 0.0,
+        "mean_strict_mcs_rule": round(float(np.mean(strict_rule)), 4) if strict_rule else 0.0,
+        "mean_strict_mcs_learned": round(float(np.mean(strict_model)), 4) if strict_model else 0.0,
         "mean_similarity_to_nearest_known": round(float(np.mean(novelty)), 4) if novelty else 0.0,
     }
     print("\nstructures built from the learned blocks:")
     print(f"  domain rule : {report['mean_tanimoto_rule']:.4f}")
     print(f"  learned     : {report['mean_tanimoto_learned']:.4f}")
+    print("\nstrict maximum common substructure, bond orders included:")
+    print(f"  domain rule : {report['mean_strict_mcs_rule']:.4f}")
+    print(f"  learned     : {report['mean_strict_mcs_learned']:.4f}")
     print("\nagainst the reference with sugars and halogens stripped:")
     print(f"  domain rule : {report['mean_backbone_tanimoto_rule']:.4f}")
     print(f"  learned     : {report['mean_backbone_tanimoto_learned']:.4f}")

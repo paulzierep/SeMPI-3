@@ -7,23 +7,29 @@
       "tanimoto_median": 0.1111,
       "tanimoto_ge_0.4": 56,
       "tanimoto_ge_0.6": 14,
-      "coverage_pred_mean": 0.4252
+      "coverage_pred_mean": 0.4251,
+      "strict_coverage_pred_mean": 0.3892,
+      "substructure_match_rate": 0.0246
     },
     "sempi3_antismash": {
       "predicted": 1341,
-      "tanimoto_mean": 0.1878,
-      "tanimoto_median": 0.1429,
-      "tanimoto_ge_0.4": 126,
+      "tanimoto_mean": 0.1945,
+      "tanimoto_median": 0.15,
+      "tanimoto_ge_0.4": 127,
       "tanimoto_ge_0.6": 40,
-      "coverage_pred_mean": 0.4707
+      "coverage_pred_mean": 0.5019,
+      "strict_coverage_pred_mean": 0.4344,
+      "substructure_match_rate": 0.0216
     },
     "sempi3_antismash_oracle": {
       "predicted": 1341,
-      "tanimoto_mean": 0.2237,
-      "tanimoto_median": 0.1618,
+      "tanimoto_mean": 0.2301,
+      "tanimoto_median": 0.1667,
       "tanimoto_ge_0.4": 211,
-      "tanimoto_ge_0.6": 75,
-      "coverage_pred_mean": 0.5366
+      "tanimoto_ge_0.6": 76,
+      "coverage_pred_mean": 0.5656,
+      "strict_coverage_pred_mean": 0.4978,
+      "substructure_match_rate": 0.035
     },
     "sempi3_mibig": {
       "predicted": 528,
@@ -31,22 +37,24 @@
       "tanimoto_median": 0.2053,
       "tanimoto_ge_0.4": 122,
       "tanimoto_ge_0.6": 41,
-      "coverage_pred_mean": 0.5791
+      "coverage_pred_mean": 0.5784,
+      "strict_coverage_pred_mean": 0.5292,
+      "substructure_match_rate": 0.0341
     }
   },
   "head_to_head_sempi3_antismash": {
     "compared": 1161,
-    "wins": 845,
-    "ties": 8,
-    "losses": 308,
-    "mean_delta": 0.0581
+    "wins": 862,
+    "ties": 7,
+    "losses": 292,
+    "mean_delta": 0.0613
   },
   "head_to_head_sempi3_antismash_oracle": {
     "compared": 1161,
-    "wins": 984,
-    "ties": 26,
-    "losses": 151,
-    "mean_delta": 0.0978
+    "wins": 1003,
+    "ties": 25,
+    "losses": 133,
+    "mean_delta": 0.101
   },
   "head_to_head_sempi3_mibig": {
     "compared": 490,
@@ -59,22 +67,22 @@
     "NRPS_only": {
       "clusters": 469,
       "antismash": 0.2193,
-      "sempi3_antismash": 0.3006,
-      "sempi3_antismash_oracle": 0.3838,
+      "sempi3_antismash": 0.3016,
+      "sempi3_antismash_oracle": 0.3835,
       "sempi3_mibig": 0.3724
     },
     "PKS_only": {
       "clusters": 677,
       "antismash": 0.0909,
-      "sempi3_antismash": 0.1159,
-      "sempi3_antismash_oracle": 0.1241,
+      "sempi3_antismash": 0.1282,
+      "sempi3_antismash_oracle": 0.1363,
       "sempi3_mibig": 0.1324
     },
     "hybrid": {
       "clusters": 375,
       "antismash": 0.1356,
-      "sempi3_antismash": 0.2002,
-      "sempi3_antismash_oracle": 0.2362,
+      "sempi3_antismash": 0.2025,
+      "sempi3_antismash_oracle": 0.2391,
       "sempi3_mibig": 0.2311
     }
   }

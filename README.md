@@ -86,8 +86,22 @@ sempi3 benchmark --workers 8           # score every arm over MIBiG
    against curated domains from MIBiG and PARAS. antiSMASH's own calls are
    never overridden.
 4. **Compare** (`compare.py`) — score the prediction against the known
-   structure with Morgan-fingerprint Tanimoto and a maximum-common-substructure
-   search.
+   structure four ways, because no single number says whether a backbone is
+   right:
+
+   | Measure | What it answers |
+   |---|---|
+   | `tanimoto` | Morgan-fingerprint similarity to the whole product |
+   | `coverage_pred` | share of the prediction found in the product, bond orders ignored |
+   | `strict_coverage_pred` | the same with bond orders required to agree |
+   | `substructure` | is the prediction literally contained in the product |
+
+   The strict measure exists because the loose one is blind to exactly the
+   differences an assembly line decides. A saturated chain scored against an
+   unsaturated one gives a loose coverage of 1.00 and a strict coverage of
+   0.75; Tanimoto meanwhile falls from 1.0 to 0.375, which overstates a
+   one-bond difference. Reading all four together is more honest than
+   trusting any one of them.
 
 The result is a **backbone**. Post-assembly tailoring — glycosylation,
 halogenation, oxidative crosslinking, prenylation — is not modelled, so a
@@ -139,14 +153,14 @@ Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known struct
 | Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
 |---|---|---|---|---|---|---|
 | antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
-| SeMPI-3 from antiSMASH | 1341 | 0.195 | 0.150 | 127 | 40 | 0.500 |
-| SeMPI-3 from MIBiG modules | 528 | 0.276 | 0.205 | 122 | 41 | 0.579 |
+| SeMPI-3 from antiSMASH | 1341 | 0.195 | 0.150 | 127 | 40 | 0.502 |
+| SeMPI-3 from MIBiG modules | 528 | 0.276 | 0.205 | 122 | 41 | 0.578 |
 
 **Head to head against antiSMASH**, on clusters where both made a prediction:
 
 | Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
 |---|---|---|---|---|---|
-| SeMPI-3 from antiSMASH | 1161 | 864 | 7 | 290 | +0.062 |
+| SeMPI-3 from antiSMASH | 1161 | 862 | 7 | 292 | +0.061 |
 | SeMPI-3 from MIBiG modules | 490 | 360 | 5 | 125 | +0.098 |
 
 **Mean Tanimoto by cluster class:**
@@ -201,11 +215,20 @@ chemistry without improving the structures:
 | Beta-carbon oxidation state | 0.73 against the rule's 0.62 | unchanged, with 23 of 40 structures altered |
 | Which detected modules to skip | 0.777, below always-keep's 0.807 | unchanged |
 
-The oxidation-state model was also scored against the reference with its
-sugars and halogens stripped off (`compare.backbone_tanimoto`), in case the
-whole-molecule score was hiding the gain. It was not: 0.2071 against 0.2069.
-One oxygen among sixty atoms does not move a fingerprint, while the monomer a
-module picks moves several atoms at once.
+The oxidation-state model was checked three ways in case the measure was
+hiding its gain: against the whole product (0.2102 either way), against the
+product with its sugars and halogens stripped off (0.2071 against 0.2069),
+and against a strict maximum common substructure where bond orders have to
+agree and an oxidation level therefore counts (0.4229 against 0.4212). It
+gained nothing on any of them. One oxygen among sixty atoms does not move a
+structure comparison, while the monomer a module picks moves several atoms at
+once.
+
+One caveat on that: modules are aligned to the curation by gene and by order
+within the gene, which can mismatch where the two disagree about how many
+modules a gene carries. That would blur both the training labels and where
+the predictions land, so the result is evidence against the oxidation state
+mattering much, not proof.
 
 Two results are worth stating plainly because they are negative:
 

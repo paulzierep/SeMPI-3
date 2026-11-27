@@ -11,5 +11,7 @@
   "mean_tanimoto_learned": 0.2102,
   "mean_backbone_tanimoto_rule": 0.2071,
   "mean_backbone_tanimoto_learned": 0.2069,
+  "mean_strict_mcs_rule": 0.4229,
+  "mean_strict_mcs_learned": 0.4212,
   "mean_similarity_to_nearest_known": 0.0
 }

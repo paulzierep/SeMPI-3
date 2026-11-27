@@ -183,11 +183,16 @@ def _survival(values: Sequence[float]) -> tuple:
 
 def plot_quality(df: pd.DataFrame, theme: Theme, path: Path) -> Path:
     """How many clusters reach a given score, for each arm."""
-    fig, axes = plt.subplots(1, 2, figsize=(10.0, 4.6), facecolor=theme.surface)
+    fig, axes = plt.subplots(1, 3, figsize=(14.0, 4.6), facecolor=theme.surface)
     label_heights = {"antismash": 0.30, "sempi3_antismash": 0.52, "sempi3_mibig": 0.74}
     panels = [
-        ("tanimoto", "Tanimoto similarity", "Whole-molecule similarity to the known structure"),
-        ("coverage_pred", "Coverage of the prediction", "Share of predicted atoms found in the product"),
+        ("tanimoto", "Tanimoto similarity", "Whole-molecule fingerprint similarity"),
+        ("coverage_pred", "Structure match", "Share of predicted atoms found in the product"),
+        (
+            "strict_coverage_pred",
+            "Structure match, strict",
+            "The same, with bond orders required to agree",
+        ),
     ]
     for ax, (metric, title, subtitle) in zip(axes, panels):
         _style_axes(ax, theme)
@@ -207,7 +212,7 @@ def plot_quality(df: pd.DataFrame, theme: Theme, path: Path) -> Path:
         ax.set_xlim(0, 1.0)
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.tight_layout(rect=[0, 0.10, 1, 0.90])
+    fig.tight_layout(rect=[0, 0.11, 1, 0.90])
     _figure_legend(fig, handles, labels, theme, ncol=3)
     return _save(fig, path, theme)
 

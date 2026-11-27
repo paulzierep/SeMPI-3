@@ -64,7 +64,15 @@ FIELDS = [
 ] + [
     f"{arm}_{metric}"
     for arm in ARMS
-    for metric in ("tanimoto", "coverage_pred", "coverage_true", "atoms", "release")
+    for metric in (
+        "tanimoto",
+        "coverage_pred",
+        "coverage_true",
+        "strict_coverage_pred",
+        "substructure",
+        "atoms",
+        "release",
+    )
 ] + [
     "true_smiles",
     "notes",
@@ -104,6 +112,10 @@ class Result:
             row[f"{arm}_tanimoto"] = round(score.tanimoto, 4) if score else None
             row[f"{arm}_coverage_pred"] = round(score.mcs_coverage_pred, 4) if score else None
             row[f"{arm}_coverage_true"] = round(score.mcs_coverage_true, 4) if score else None
+            row[f"{arm}_strict_coverage_pred"] = (
+                round(score.mcs_strict_coverage_pred, 4) if score else None
+            )
+            row[f"{arm}_substructure"] = round(score.substructure_match, 4) if score else None
             row[f"{arm}_atoms"] = score.pred_atoms if score else None
             row[f"{arm}_release"] = score.release if score else None
             row[f"{arm}_smiles"] = self.smiles.get(arm)
@@ -174,6 +186,7 @@ def evaluate_entry(  # noqa: PLR0913
                     entry.structures,
                     entry.compound_names,
                     timeout=mcs_timeout,
+                    strict=True,
                 )
             if substrate_fill:
                 applied = apply_substrate_fill(record.spec, substrate_fill.get(accession, {}))
@@ -204,11 +217,16 @@ def evaluate_entry(  # noqa: PLR0913
                     entry.structures,
                     entry.compound_names,
                     timeout=mcs_timeout,
+                    strict=True,
                 )
                 # Oracle over release variants: an upper bound, not a prediction.
                 result.smiles["sempi3_antismash_oracle"] = prediction.smiles
                 result.scores["sempi3_antismash_oracle"] = compare.best_match(
-                    prediction.variants, entry.structures, entry.compound_names, timeout=mcs_timeout
+                    prediction.variants,
+                    entry.structures,
+                    entry.compound_names,
+                    timeout=mcs_timeout,
+                    strict=True,
                 )
     else:
         result.notes.append("no antismash output")
@@ -225,6 +243,7 @@ def evaluate_entry(  # noqa: PLR0913
                 entry.structures,
                 entry.compound_names,
                 timeout=mcs_timeout,
+                strict=True,
             )
 
     for arm in ARMS:
@@ -343,6 +362,8 @@ def summarise(results: List[Result]) -> Dict[str, object]:
         scores = [r.scores[arm] for r in results if r.scores.get(arm)]
         tanimotos = [s.tanimoto for s in scores]  # type: ignore[union-attr]
         coverage = [s.mcs_coverage_pred for s in scores]  # type: ignore[union-attr]
+        strict = [s.mcs_strict_coverage_pred for s in scores]  # type: ignore[union-attr]
+        substructure = [s.substructure_match for s in scores]  # type: ignore[union-attr]
         per_arm[arm] = {
             "predicted": len(scores),
             "tanimoto_mean": round(sum(tanimotos) / len(tanimotos), 4) if tanimotos else 0.0,
@@ -350,6 +371,10 @@ def summarise(results: List[Result]) -> Dict[str, object]:
             "tanimoto_ge_0.4": sum(1 for t in tanimotos if t >= 0.4),
             "tanimoto_ge_0.6": sum(1 for t in tanimotos if t >= 0.6),
             "coverage_pred_mean": round(sum(coverage) / len(coverage), 4) if coverage else 0.0,
+            "strict_coverage_pred_mean": round(sum(strict) / len(strict), 4) if strict else 0.0,
+            "substructure_match_rate": round(sum(substructure) / len(substructure), 4)
+            if substructure
+            else 0.0,
         }
     summary["arms"] = per_arm
 

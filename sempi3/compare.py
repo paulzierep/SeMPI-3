@@ -55,6 +55,14 @@ class Similarity:
     mcs_atoms: int = 0
     mcs_coverage_pred: float = 0.0
     mcs_coverage_true: float = 0.0
+    #: Same, but with bond orders required to match. A single bond standing
+    #: where the product has a double one breaks the match, so this is the
+    #: measure that notices an oxidation level.
+    mcs_strict_atoms: int = 0
+    mcs_strict_coverage_pred: float = 0.0
+    #: Largest fraction of the prediction that is literally a substructure of
+    #: the product, element and bond order included.
+    substructure_match: float = 0.0
     pred_atoms: int = 0
     true_atoms: int = 0
     compound: Optional[str] = None
@@ -150,11 +158,35 @@ def tanimoto(pred: Chem.Mol, true: Chem.Mol) -> float:
     return float(DataStructs.TanimotoSimilarity(fp_a, fp_b))
 
 
+def _mcs_atoms(pred, true, timeout: int, strict: bool) -> int:
+    """Atoms in the largest common substructure of two molecules.
+
+    With ``strict`` the bond orders have to agree, which makes the result
+    sensitive to oxidation levels; without it a chain matches whether it is
+    saturated or not.
+    """
+    try:
+        result = rdFMCS.FindMCS(
+            [pred, true],
+            timeout=timeout,
+            matchValences=False,
+            ringMatchesRingOnly=True,
+            completeRingsOnly=False,
+            bondCompare=rdFMCS.BondCompare.CompareOrderExact
+            if strict
+            else rdFMCS.BondCompare.CompareAny,
+        )
+        return result.numAtoms
+    except Exception:  # noqa: BLE001 - RDKit raises broadly on odd inputs
+        return 0
+
+
 def compare(
     pred_smiles: str,
     true_smiles: str,
     timeout: int = MCS_TIMEOUT,
     with_mcs: bool = True,
+    strict: bool = False,
 ) -> Optional[Similarity]:
     """Score one prediction against one known structure.
 
@@ -162,6 +194,8 @@ def compare(
         with_mcs: Run the maximum-common-substructure search. It dominates the
             runtime, so callers that only need the fingerprint score — such as
             :func:`best_match` while it is still choosing a pair — switch it off.
+        strict: Also run the search with bond orders required to match, and
+            test whether the prediction is a literal substructure.
     """
     pred = parse(pred_smiles)
     true = parse(true_smiles)
@@ -175,22 +209,17 @@ def compare(
     )
     if not with_mcs:
         return result
-    try:
-        mcs = rdFMCS.FindMCS(
-            [pred, true],
-            timeout=timeout,
-            matchValences=False,
-            ringMatchesRingOnly=True,
-            completeRingsOnly=False,
-            bondCompare=rdFMCS.BondCompare.CompareAny,
-        )
-        result.mcs_atoms = mcs.numAtoms
-    except Exception:  # noqa: BLE001 - RDKit raises broadly on odd inputs
-        result.mcs_atoms = 0
+    result.mcs_atoms = _mcs_atoms(pred, true, timeout, strict=False)
     if result.pred_atoms:
         result.mcs_coverage_pred = result.mcs_atoms / result.pred_atoms
     if result.true_atoms:
         result.mcs_coverage_true = result.mcs_atoms / result.true_atoms
+
+    if strict:
+        result.mcs_strict_atoms = _mcs_atoms(pred, true, timeout, strict=True)
+        if result.pred_atoms:
+            result.mcs_strict_coverage_pred = result.mcs_strict_atoms / result.pred_atoms
+        result.substructure_match = 1.0 if true.HasSubstructMatch(pred) else 0.0
     return result
 
 
@@ -199,6 +228,7 @@ def best_match(
     true_smiles_list: Iterable[str],
     compound_names: Optional[List[str]] = None,
     timeout: int = MCS_TIMEOUT,
+    strict: bool = False,
 ) -> Optional[Similarity]:
     """Best score over all release variants and all known compounds.
 
@@ -224,7 +254,7 @@ def best_match(
 
     if best is None or best_pair is None:
         return best
-    full = compare(best_pair[0], best_pair[1], timeout=timeout, with_mcs=True)
+    full = compare(best_pair[0], best_pair[1], timeout=timeout, with_mcs=True, strict=strict)
     if full is not None:
         full.release = best.release
         full.compound = best.compound
