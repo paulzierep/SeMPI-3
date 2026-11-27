@@ -98,6 +98,7 @@ def run_on_file(gbk: Path, output_format: str, no_fill: bool, no_tailoring: bool
             "modules",
             "substrates_predicted",
             "release",
+            "modular",
             "smiles",
             "antismash_smiles",
         ]
@@ -111,6 +112,7 @@ def run_on_file(gbk: Path, output_format: str, no_fill: bool, no_tailoring: bool
                         str(len(r.modules)),
                         str(r.filled_substrates),
                         r.release or "-",
+                        "yes" if r.modular else "no",
                         r.smiles or "-",
                         r.antismash_smiles or "-",
                     ]
@@ -147,6 +149,8 @@ def _render(result) -> str:
             lines.append(f"substrates named by the pocket model: {result.filled_substrates}")
         if result.tailoring_genes:
             lines.append(f"tailoring enzymes: {result.tailoring_genes}")
+        if not result.modular:
+            lines.append("WARNING: not a modular assembly line; the structure below is a fragment at best")
         lines.append(f"release: {result.release}")
         lines.append(f"SeMPI-3:   {result.smiles}")
         if result.antismash_smiles:

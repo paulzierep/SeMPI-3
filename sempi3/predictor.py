@@ -123,6 +123,7 @@ class ClusterPrediction:
     antismash_smiles: Optional[str] = None
     filled_substrates: int = 0
     chosen_by: str = "rule"
+    modular: bool = True
     notes: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, object]:
@@ -137,6 +138,7 @@ class ClusterPrediction:
             "antismash_smiles": self.antismash_smiles,
             "filled_substrates": self.filled_substrates,
             "chosen_by": self.chosen_by,
+            "modular": self.modular,
             "notes": self.notes,
         }
 
@@ -269,6 +271,15 @@ def _predict_record(
             }
         )
 
+    notes = list(prediction.notes)
+    if not record.modular:
+        notes.insert(
+            0,
+            "not a modular assembly line (iterative or type III synthase): "
+            "the module count does not determine the size of the product, "
+            "so this structure is a fragment at best",
+        )
+
     return ClusterPrediction(
         bgc_id=record.bgc_id,
         smiles=smiles,
@@ -280,5 +291,6 @@ def _predict_record(
         antismash_smiles=record.baseline,
         filled_substrates=filled,
         chosen_by=chosen_by,
-        notes=prediction.notes,
+        modular=record.modular,
+        notes=notes,
     )

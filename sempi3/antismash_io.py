@@ -69,6 +69,14 @@ DOMAIN_ROLES: Dict[str, str] = {
     "TIGR01720": "ignore",
 }
 
+#: Cluster types whose product is not read off a modular assembly line.
+#:
+#: An iterative polyketide synthase uses one module many times, and a type III
+#: synthase has no carrier protein at all, so counting modules says nothing
+#: about the size of the product. SeMPI-3 reports these as out of scope rather
+#: than building a chain two units long for a forty-atom molecule.
+ITERATIVE_PRODUCTS = frozenset({"T2PKS", "T3PKS", "PUFA", "hglE-KS", "prodigiosin"})
+
 #: antiSMASH substrate names that mean "no prediction".
 UNKNOWN_SUBSTRATES = {"x", "pk", "nrp", "?", ""}
 
@@ -117,6 +125,23 @@ class AntismashRecord:
     baseline_smiles: List[str] = field(default_factory=list)
     products: List[str] = field(default_factory=list)
     tailoring_genes: Dict[str, int] = field(default_factory=dict)
+
+    @property
+    def modular(self) -> bool:
+        """False when the product does not come from a modular assembly line.
+
+        An iterative or type III synthase is reported but not built: the
+        module count bears no relation to the size of its product.
+        """
+        kinds = set(self.products)
+        if not kinds:
+            return True
+        if kinds & set(ITERATIVE_PRODUCTS):
+            # A cluster can hold both, in which case the modular part is
+            # still worth assembling.
+            modular_too = any(p not in ITERATIVE_PRODUCTS for p in kinds)
+            return modular_too and self.spec.n_modules >= 3
+        return True
 
     @property
     def baseline(self) -> Optional[str]:

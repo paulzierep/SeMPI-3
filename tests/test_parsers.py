@@ -183,3 +183,32 @@ def test_backbone_tanimoto_ignores_the_decorations():
     backbone = compare.backbone_tanimoto("OC1CCCCC1", "CC1OC(OC2CCCCC2)C(O)C(O)C1O")
     assert whole is not None and backbone is not None
     assert backbone > whole.tanimoto
+
+
+def test_iterative_clusters_are_flagged_as_not_modular():
+    from sempi3.antismash_io import AntismashRecord
+    from sempi3.spec import ClusterSpec, Module, PKS
+
+    spec = ClusterSpec(bgc_id="T", modules=[Module(kind=PKS) for _ in range(2)])
+    iterative = AntismashRecord(bgc_id="T", spec=spec, products=["T2PKS"])
+    assert not iterative.modular
+
+    modular = AntismashRecord(bgc_id="T", spec=spec, products=["T1PKS"])
+    assert modular.modular
+
+
+def test_a_hybrid_with_enough_modules_still_counts_as_modular():
+    from sempi3.antismash_io import AntismashRecord
+    from sempi3.spec import ClusterSpec, Module, PKS
+
+    spec = ClusterSpec(bgc_id="T", modules=[Module(kind=PKS) for _ in range(5)])
+    hybrid = AntismashRecord(bgc_id="T", spec=spec, products=["T2PKS", "NRPS"])
+    assert hybrid.modular
+
+
+def test_a_cluster_without_products_is_assumed_modular():
+    from sempi3.antismash_io import AntismashRecord
+    from sempi3.spec import ClusterSpec, Module, PKS
+
+    spec = ClusterSpec(bgc_id="T", modules=[Module(kind=PKS)])
+    assert AntismashRecord(bgc_id="T", spec=spec, products=[]).modular
