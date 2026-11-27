@@ -47,6 +47,7 @@ from . import (
     assembly,
     compare,
     mibig,
+    tailoring,
 )
 
 #: The prediction arms, in report order.
@@ -109,11 +110,31 @@ class Result:
         return row
 
 
+def apply_substrate_fill(spec, fill: Dict[str, str]) -> int:
+    """Give unassigned NRPS modules a predicted substrate.
+
+    ``fill`` maps ``"<gene>:<domain index>"`` to a substrate name. Only modules
+    antiSMASH left empty are touched, so its own calls always win.
+    """
+    applied = 0
+    for module in spec.modules:
+        if module.substrate or module.domain_index is None:
+            continue
+        predicted = fill.get(f"{module.gene}:{module.domain_index}")
+        if predicted:
+            module.substrate = predicted
+            applied += 1
+    return applied
+
+
 def evaluate_entry(
     accession: str,
     json_dir: Path,
     antismash_dir: Path,
     mcs_timeout: int = 5,
+    substrate_fill: Optional[Dict[str, Dict[str, str]]] = None,
+    release_prediction: Optional[Dict[str, str]] = None,
+    tailoring_enabled: Optional[List[str]] = None,
 ) -> Optional[Result]:
     """Score every arm for one cluster, or return ``None`` if out of scope."""
     json_path = Path(json_dir) / f"{accession}.json"
@@ -149,8 +170,23 @@ def evaluate_entry(
                     entry.compound_names,
                     timeout=mcs_timeout,
                 )
-            prediction = assembly.assemble(record.spec, skip_unknown_substrates=True)
+            if substrate_fill:
+                applied = apply_substrate_fill(record.spec, substrate_fill.get(accession, {}))
+                if applied:
+                    result.notes.append(f"filled {applied} substrate(s) with the pocket model")
+            prediction = assembly.assemble(
+                record.spec,
+                skip_unknown_substrates=True,
+                release_override=(release_prediction or {}).get(accession),
+            )
             result.notes.extend(prediction.notes[:2])
+            if prediction.variants and tailoring_enabled and record.tailoring_genes:
+                genes = tailoring.TailoringGenes(counts=record.tailoring_genes)
+                decorated = tailoring.apply(prediction.smiles, genes, enabled=tailoring_enabled)
+                if decorated and decorated != prediction.smiles:
+                    prediction.variants[prediction.release] = decorated
+                    prediction.smiles = decorated
+                    result.notes.append("tailoring applied")
             if prediction.variants:
                 # Committed prediction: the single structure a user would get.
                 result.smiles["sempi3_antismash"] = prediction.smiles
@@ -193,9 +229,25 @@ def evaluate_entry(
 
 
 def _worker(args):
-    accession, json_dir, antismash_dir, timeout = args
+    accession, json_dir, antismash_dir, timeout, fill_path, release_path, tailoring_enabled = args
+    fill = None
+    if fill_path:
+        with open(fill_path) as handle:
+            fill = json.load(handle)
+    releases = None
+    if release_path:
+        with open(release_path) as handle:
+            releases = json.load(handle).get("predictions", {})
     try:
-        return evaluate_entry(accession, Path(json_dir), Path(antismash_dir), mcs_timeout=timeout)
+        return evaluate_entry(
+            accession,
+            Path(json_dir),
+            Path(antismash_dir),
+            mcs_timeout=timeout,
+            substrate_fill=fill,
+            release_prediction=releases,
+            tailoring_enabled=tailoring_enabled,
+        )
     except Exception as exc:  # noqa: BLE001 - one bad entry must not stop the run
         return Result(bgc_id=accession, status=f"error: {exc}")
 
@@ -206,12 +258,20 @@ def run(
     limit: Optional[int] = None,
     workers: int = 4,
     mcs_timeout: int = 5,
+    substrate_fill_path: Optional[Path] = None,
+    release_prediction_path: Optional[Path] = None,
+    tailoring_enabled: Optional[List[str]] = None,
 ) -> List[Result]:
     """Evaluate every MIBiG entry that has a structure and is PKS/NRPS."""
     accessions = sorted(p.stem for p in Path(json_dir).glob("*.json"))
     if limit:
         accessions = accessions[:limit]
-    jobs = [(a, str(json_dir), str(antismash_dir), mcs_timeout) for a in accessions]
+    fill_path = str(substrate_fill_path) if substrate_fill_path else None
+    release_path = str(release_prediction_path) if release_prediction_path else None
+    jobs = [
+        (a, str(json_dir), str(antismash_dir), mcs_timeout, fill_path, release_path, tailoring_enabled)
+        for a in accessions
+    ]
     results: List[Result] = []
     with ProcessPoolExecutor(max_workers=workers) as pool:
         for result in pool.map(_worker, jobs, chunksize=4):

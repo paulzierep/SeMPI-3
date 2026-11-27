@@ -22,5 +22,12 @@ echo "==> MIBiG 4.0 antiSMASH 8 output"
     "$BASE_URL/mibig_antismash_4.0_gbk_as8b1.tar.bz2"
 mkdir -p antismash && tar xjf mibig_antismash_4.0.tar.bz2 -C antismash
 
+echo "==> PARAS A-domain training set"
+# 2,873 adenylation domains with curated substrates and 34-residue binding
+# pocket signatures, from Terlouw et al. (PARAS/PARASECT). CC BY 4.0.
+mkdir -p ../external/paras
+[ -f ../external/paras/dataset_paras.tsv ] || curl -fL -o ../external/paras/dataset_paras.tsv \
+    "https://raw.githubusercontent.com/BTheDragonMaster/parasect/main/condensed/data/dataset_paras.tsv"
+
 echo "==> done"
-du -sh json antismash
+du -sh json antismash ../external

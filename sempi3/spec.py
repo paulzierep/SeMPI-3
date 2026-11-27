@@ -50,6 +50,10 @@ class Module:
         gene: Locus tag or protein id the module was found on, for reporting.
         order: Position in the assembly line, starting at 0.
         confidence: Optional score from the prediction source.
+        domain_index: Index of the substrate-selecting domain within its gene,
+            counting from zero. Together with ``gene`` it identifies the domain
+            across data sources.
+        sequence: Amino acid sequence of that domain, when the source gives it.
     """
 
     kind: str
@@ -63,6 +67,8 @@ class Module:
     gene: Optional[str] = None
     order: int = 0
     confidence: Optional[float] = None
+    domain_index: Optional[int] = None
+    sequence: Optional[str] = None
 
     def __post_init__(self) -> None:
         if self.kind not in (PKS, NRPS):
@@ -99,6 +105,7 @@ class Module:
             "gene": self.gene,
             "order": self.order,
             "confidence": self.confidence,
+            "domain_index": self.domain_index,
         }
 
     @classmethod

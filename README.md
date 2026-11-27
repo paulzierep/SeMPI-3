@@ -35,6 +35,7 @@ publishes that output for every entry, so nothing has to be installed or run.
 |---|---|---|
 | `mibig_json_4.0.tar.gz` | 30 MB | curated clusters: compounds with SMILES, curated modules |
 | `mibig_antismash_4.0_gbk_as8b1.tar.bz2` | 64 MB | antiSMASH 8 output per entry: domains, substrates, baseline SMILES |
+| `dataset_paras.tsv` | 175 kB | 2,873 curated A-domain substrates with binding-pocket signatures ([PARAS](https://github.com/BTheDragonMaster/parasect), CC BY 4.0) |
 
 Of 3,013 MIBiG entries, **1,457** are PKS/NRPS with both a known structure and
 an antiSMASH annotation. That is the benchmark set.
@@ -61,7 +62,12 @@ sempi3 benchmark --workers 8           # score every arm over MIBiG
    - epimerase domains invert the alpha carbon, methyltransferases add a methyl;
    - the chain is released by hydrolysis, reduction, macrolactamisation or
      macrolactonisation.
-3. **Compare** (`compare.py`) — score the prediction against the known
+3. **Fill the gaps** (`stachelhaus.py`, `substrates.py`) — antiSMASH reports
+   no substrate for about one adenylation domain in six. Those domains are
+   given one by reading their binding-pocket residues and matching them
+   against curated domains from MIBiG and PARAS. antiSMASH's own calls are
+   never overridden.
+4. **Compare** (`compare.py`) — score the prediction against the known
    structure with Morgan-fingerprint Tanimoto and a maximum-common-substructure
    search.
 
@@ -115,23 +121,23 @@ Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known struct
 | Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
 |---|---|---|---|---|---|---|
 | antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
-| SeMPI-3 from antiSMASH | 1336 | 0.187 | 0.145 | 117 | 36 | 0.525 |
+| SeMPI-3 from antiSMASH | 1341 | 0.192 | 0.146 | 128 | 39 | 0.502 |
 | SeMPI-3 from MIBiG modules | 528 | 0.276 | 0.205 | 122 | 41 | 0.579 |
 
 **Head to head against antiSMASH**, on clusters where both made a prediction:
 
 | Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
 |---|---|---|---|---|---|
-| SeMPI-3 from antiSMASH | 1159 | 839 | 8 | 312 | +0.051 |
+| SeMPI-3 from antiSMASH | 1161 | 859 | 8 | 294 | +0.058 |
 | SeMPI-3 from MIBiG modules | 490 | 360 | 5 | 125 | +0.098 |
 
 **Mean Tanimoto by cluster class:**
 
 | Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |
 |---|---|---|---|---|
-| NRPS_only | 469 | 0.219 | 0.290 | 0.372 |
-| PKS_only | 677 | 0.091 | 0.127 | 0.132 |
-| hybrid | 375 | 0.136 | 0.192 | 0.231 |
+| NRPS_only | 469 | 0.219 | 0.299 | 0.372 |
+| PKS_only | 677 | 0.091 | 0.126 | 0.132 |
+| hybrid | 375 | 0.136 | 0.201 | 0.231 |
 
 Tanimoto is low for every arm in absolute terms, which is expected: all three predict a *backbone*, while the reference is the finished, tailored natural product. The comparison between arms is the meaningful part.
 <!-- RESULTS:END -->

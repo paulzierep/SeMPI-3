@@ -1,0 +1,1829 @@
+{
+"BGC0000024": {
+"aurE:0": "glycine"
+},
+"BGC0000028": {
+"ADC79613.1:0": "glutamic acid",
+"ADC79614.1:0": "tryptophan"
+},
+"BGC0000029": {
+"becJ:0": "valine",
+"becL:0": "alanine"
+},
+"BGC0000034": {
+"fscA:0": "pipecolic acid"
+},
+"BGC0000042": {
+"BAO66547.1:0": "n5-trans-anhydromevalonyl-n5-hydroxyornithine",
+"cmiS6:0": "glycine"
+},
+"BGC0000051": {
+"orf1:0": "alanine"
+},
+"BGC0000052": {
+"AAX98208.1:0": "phenylalanine",
+"AAX98210.1:0": "n5-hydroxyornithine"
+},
+"BGC0000062": {
+"FUM10:0": "4-hydroxyphenylpyruvic acid",
+"FUM16:0": "3,5-dihydroxyphenylglycine"
+},
+"BGC0000063": {
+"fum10:0": "phenylalanine",
+"fum16:0": "phenylalanine"
+},
+"BGC0000078": {
+"idnL1:0": "isoleucine",
+"idnL7:0": "alanine"
+},
+"BGC0000081": {
+"AFV52187.1:0": "2,3-dihydroxybenzoic acid",
+"AFV52191.1:0": "beta-tyrosine",
+"AFV52199.1:0": "phenylalanine"
+},
+"BGC0000097": {
+"mlaJ:0": "valine",
+"mlaL:0": "alanine"
+},
+"BGC0000101": {
+"ANIA_10035:0": "leucine"
+},
+"BGC0000110": {
+"norE:0": "glycine"
+},
+"BGC0000123": {
+"plmJK:0": "phenylpyruvic acid"
+},
+"BGC0000129": {
+"AFUA_6G13920:0": "ornithine"
+},
+"BGC0000130": {
+"pyr8:0": "proline"
+},
+"BGC0000141": {
+"CAI94686.1:0": "phenylalanine",
+"rubC1:0": "alanine",
+"rubF5:0": "serine"
+},
+"BGC0000142": {
+"Strop_2774:0": "alanine",
+"Strop_2775:0": "tyrosine"
+},
+"BGC0000145": {
+"salB:0": "beta-hydroxycyclohex-2s-enylalanine"
+},
+"BGC0000163": {
+"tsn19:0": "arginine"
+},
+"BGC0000167": {
+"vinM:0": "alanine"
+},
+"BGC0000171": {
+"CCC21111.1:0": "tryptophan"
+},
+"BGC0000172": {
+"P615_14910:0": "anthranilic acid"
+},
+"BGC0000175": {
+"AFO59871.1:0": "3r-aminoisobutyric acid"
+},
+"BGC0000176": {
+"difD:0": "valine"
+},
+"BGC0000187": {
+"asuB1:0": "4-hydroxyphenylpyruvic acid",
+"asuD1:0": "phenylalanine"
+},
+"BGC0000196": {
+"plu4188:0": "valine"
+},
+"BGC0000208": {
+"chdL-chdOIII:0": "serine"
+},
+"BGC0000209": {
+"ctcI:0": "serine"
+},
+"BGC0000210": {
+"cmmLI:0": "phenylalanine",
+"cmmLII:0": "serine"
+},
+"BGC0000213": {
+"colD1:0": "serine"
+},
+"BGC0000220": {
+"encH:0": "cysteine",
+"encN:0": "tryptophan"
+},
+"BGC0000247": {
+"mtmL:0": "serine"
+},
+"BGC0000252": {
+"nonL:0": "tryptophan"
+},
+"BGC0000258": {
+"pigI:0": "proline"
+},
+"BGC0000259": {
+"pigI:0": "proline"
+},
+"BGC0000260": {
+"hapI:0": "proline"
+},
+"BGC0000268": {
+"schA30:0": "isoleucine"
+},
+"BGC0000269": {
+"ssfL2:0": "serine"
+},
+"BGC0000270": {
+"simL:0": "arginine"
+},
+"BGC0000287": {
+"PA2302:0": "leucine"
+},
+"BGC0000288": {
+"capU:0": "lysine"
+},
+"BGC0000293": {
+"NFIA_055290:1": "anthranilic acid"
+},
+"BGC0000297": {
+"aerG:0": "asparagine"
+},
+"BGC0000298": {
+"aerG1:0": "2-carboxy-6-hydroxyoctahydroindole"
+},
+"BGC0000301": {
+"apnC:0": "homotyrosine",
+"apnC:1": "homotyrosine"
+},
+"BGC0000302": {
+"aptA1:0": "arginine",
+"aptC:0": "arginine"
+},
+"BGC0000303": {
+"ABW71852.1:0": "3-methoxyanthranilic acid",
+"ABW71853.1:0": "4r-propylproline"
+},
+"BGC0000304": {
+"aps1:2": "valine",
+"aps1:3": "2s-amino-9,10-epoxy-8-oxodecanoic acid"
+},
+"BGC0000307": {
+"aba1:0": "2r-hydroxyisovaleric acid"
+},
+"BGC0000316": {
+"cmnA:1": "serine",
+"cmnF:0": "alanine"
+},
+"BGC0000326": {
+"AAK81824.1:0": "4-hydroxyphenylglycine"
+},
+"BGC0000327": {
+"SAMR0901:0": "glycocyamine",
+"SAMR0921:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0000331": {
+"ociA:0": "homotyrosine",
+"ociB:0": "arginine",
+"ociB:1": "3-amino-6-hydroxy-2-piperidone"
+},
+"BGC0000332": {
+"mcnC:1": "3-amino-6-hydroxy-2-piperidone"
+},
+"BGC0000333": {
+"Sare_4562:0": "tryptophan",
+"Sare_4562:6": "isoleucine"
+},
+"BGC0000335": {
+"ctmC:1": "phenylalanine"
+},
+"BGC0000336": {
+"dptD:1": "kynurenine"
+},
+"BGC0000337": {
+"MAA_10036:0": "phenylalanine",
+"MAA_10043:4": "2s-hydroxyisocaproic acid"
+},
+"BGC0000339": {
+"ecm1:0": "quinoxaline-2-carboxylic acid"
+},
+"BGC0000341": {
+"endB:5": "ornithine",
+"endC:0": "ornithine",
+"endC:3": "4-hydroxyphenylglycine",
+"endC:5": "ornithine"
+},
+"BGC0000348": {
+"lpsB:0": "glutamine"
+},
+"BGC0000350": {
+"ETU_000008:0": "3-hydroxy-o-methyl-5-methyltyrosine",
+"ETU_000009:0": "alanine"
+},
+"BGC0000354": {
+"pstA:0": "2,3-diamino-3-methylpropanoic acid",
+"pstC:0": "3-methylaspartic acid"
+},
+"BGC0000355": {
+"AFUA_6G12080:2": "anthranilic acid"
+},
+"BGC0000360": {
+"getE:0": "pipecolic acid",
+"getH:0": "ornithine",
+"getJ:0": "histidine"
+},
+"BGC0000362": {
+"pstB:1": "alanine"
+},
+"BGC0000366": {
+"gobK:0": "salicylic acid"
+},
+"BGC0000367": {
+"BBR47_28940:2": "tryptophan",
+"BBR47_28940:4": "tryptophan"
+},
+"BGC0000369": {
+"hasY:1": "tyrosine"
+},
+"BGC0000374": {
+"AEH41793.1:0": "leucine",
+"AEH41793.1:2": "kynurenine",
+"AEH41793.1:3": "leucine",
+"AEH41794.1:0": "kynurenine",
+"AEH41794.1:2": "proline"
+},
+"BGC0000376": {
+"fmoA1:0": "2-methylserine",
+"fmoA3:0": "6-chloro-4-hydroxy-1-methyl-indole-3-carboxylic acid"
+},
+"BGC0000378": {
+"ABV56604.1:0": "leucine",
+"ktzB:0": "leucine",
+"ktzE:0": "valine",
+"ktzH:0": "isoleucine",
+"ktzH:2": "piperazic acid"
+},
+"BGC0000379": {
+"lpmB:0": "aspartic acid"
+},
+"BGC0000380": {
+"leu5:0": "proline"
+},
+"BGC0000383": {
+"PluTT01m_09665:1": "lysine"
+},
+"BGC0000385": {
+"AEH59099.1:2": "phenylalanine",
+"AEH59099.1:3": "leucine",
+"AEH59100.1:3": "threonine",
+"AEH59100.1:5": "asparagine"
+},
+"BGC0000386": {
+"BTH_I2417:0": "n5-acetyl-n5-hydroxyornithine",
+"BTH_I2418:2": "n5-acetyl-n5-hydroxyornithine"
+},
+"BGC0000388": {
+"mppB:1": "lysine"
+},
+"BGC0000391": {
+"AFO85453.1:0": "valine"
+},
+"BGC0000393": {
+"MXAN_3779:2": "valine"
+},
+"BGC0000394": {
+"AGD80616.1:0": "leucine",
+"AGD80618.1:0": "tryptophan"
+},
+"BGC0000396": {
+"ndaA:1": "3s-methyl-d-aspartic acid branched"
+},
+"BGC0000397": {
+"ncpB:3": "leucine"
+},
+"BGC0000407": {
+"yngI:0": "2,3-diaminopropionic acid"
+},
+"BGC0000409": {
+"AEA29643.1:0": "3-hydroxyvaline",
+"AEA29644.1:0": "tyrosine"
+},
+"BGC0000414": {
+"qcn19:0": "glycine"
+},
+"BGC0000415": {
+"qui16:0": "quinoxaline-2-carboxylic acid"
+},
+"BGC0000421": {
+"sfcC:0": "3-hydroxy-o-methyl-5-methyltyrosine"
+},
+"BGC0000422": {
+"sfmC:0": "3-hydroxy-o-methyltyrosine"
+},
+"BGC0000424": {
+"Hsero_2343:0": "aspartic acid",
+"Hsero_2343:2": "2,4-diaminobutyric acid"
+},
+"BGC0000425": {
+"sesC:3": "homoserine"
+},
+"BGC0000428": {
+"sibD:0": "tyrosine",
+"sibE:0": "3-methoxyanthranilic acid"
+},
+"BGC0000429": {
+"sky29:2": "aspartic acid",
+"sky30:2": "phenylalanine"
+},
+"BGC0000430": {
+"NSP_49230:2": "leucine"
+},
+"BGC0000434": {
+"swb12:0": "quinoxaline-2-carboxylic acid",
+"swb17:1": "valine"
+},
+"BGC0000435": {
+"PSPTO_2829:0": "isoleucine"
+},
+"BGC0000436": {
+"PMI03_05100:0": "isoleucine",
+"PMI03_05101:0": "ornithine"
+},
+"BGC0000439": {
+"AHH53506.1:1": "valine",
+"AHH53508.1:1": "kynurenine"
+},
+"BGC0000442": {
+"ANIA_08513:0": "tryptophan"
+},
+"BGC0000443": {
+"AED90002.1:2": "aspartic acid",
+"AED90002.1:3": "serine",
+"AED90003.1:2": "aspartic acid"
+},
+"BGC0000444": {
+"stPAI030:0": "4-nitrotryptophan"
+},
+"BGC0000445": {
+"tioJ:0": "quinoxaline-2-carboxylic acid",
+"tioN:0": "cysteine",
+"tioY:0": "asparagine",
+"tioY:1": "alanine",
+"tioZ:0": "glutamine"
+},
+"BGC0000447": {
+"taaE:3": "homoserine"
+},
+"BGC0000448": {
+"tomA:0": "3-hydroxyvaline",
+"tomB:0": "proline"
+},
+"BGC0000450": {
+"trsA:0": "quinoxaline-2-carboxylic acid"
+},
+"BGC0000457": {
+"RHE_PF00457:0": "ornithine"
+},
+"BGC0000459": {
+"AGN74880.1:0": "salicylic acid",
+"AGN74885.1:0": "valine",
+"AGN74885.1:2": "valine",
+"AGN74886.1:0": "proline"
+},
+"BGC0000460": {
+"VV2_0836:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0000461": {
+"AEP18656.1:5": "asparagine"
+},
+"BGC0000464": {
+"XDD1_2286:1": "leucine",
+"XDD1_2286:2": "leucine",
+"XDD1_2288:3": "lysine"
+},
+"BGC0000465": {
+"XNC1_2300:0": "leucine"
+},
+"BGC0000466": {
+"ADZ13554.1:0": "tryptophan"
+},
+"BGC0000819": {
+"phqB:1": "proline"
+},
+"BGC0000893": {
+"SVEN_0927:0": "lysine"
+},
+"BGC0000921": {
+"ppgM:0": "salicylic acid"
+},
+"BGC0000922": {
+"PA0996:0": "para-aminobenzoic acid"
+},
+"BGC0000949": {
+"BAI23334.1:0": "lysine"
+},
+"BGC0000950": {
+"npsP3:0": "4-hydroxyphenylglycine",
+"npsP5:0": "2,3-diamino-3-methylpropanoic acid",
+"npsP6:0": "alanine"
+},
+"BGC0000951": {
+"pacL:0": "meta-tyrosine",
+"pacO:0": "alaninol",
+"pacP:0": "2s,3s-diaminobutyric acid"
+},
+"BGC0000956": {
+"AAO39104.1:0": "arginine"
+},
+"BGC0000957": {
+"AHH25585.1:0": "tryptophan",
+"AHH25592.1:0": "glycine"
+},
+"BGC0000958": {
+"STREPS4_RS11240:0": "anthanillic acid"
+},
+"BGC0000960": {
+"azi3:0": "(2s,6r)-diamino-(5r,7)-dihydroxy-heptanoic acid",
+"azi7:0": "homotyrosine"
+},
+"BGC0000963": {
+"AAG02349.1:0": "glycine",
+"AAG02349.1:1": "arginine"
+},
+"BGC0000965": {
+"AAL06681.1:0": "beta-tyrosine"
+},
+"BGC0000969": {
+"cmdD:1": "tyrosine"
+},
+"BGC0000970": {
+"cndF:0": "tyrosine"
+},
+"BGC0000971": {
+"cinB:0": "3s-cyclohex-2-enylalanine"
+},
+"BGC0000972": {
+"clbH:0": "glycine"
+},
+"BGC0000975": {
+"crpD:0": "beta-alanine"
+},
+"BGC0000978": {
+"cyrB:0": "proline"
+},
+"BGC0000979": {
+"cyrB:0": "guanidinoacetic acid"
+},
+"BGC0000980": {
+"cyrB:0": "proline"
+},
+"BGC0000981": {
+"cyrB:0": "proline"
+},
+"BGC0000997": {
+"glbC:0": "alanine"
+},
+"BGC0001000": {
+"AAY42398.1:0": "serine"
+},
+"BGC0001008": {
+"mdpB2:0": "salicylic acid",
+"mdpC1:0": "alanine"
+},
+"BGC0001015": {
+"mcyB:1": "tyrosine",
+"mcyE:0": "glutamic acid",
+"mcyG:0": "phenylpyruvic acid"
+},
+"BGC0001016": {
+"mcyB:0": "arginine",
+"mcyB:1": "tyrosine",
+"mcyE:0": "glutamic acid"
+},
+"BGC0001017": {
+"mcyB:0": "leucine",
+"mcyB:1": "tyrosine",
+"mcyC:0": "leucine",
+"mcyE:0": "glutamic acid branched"
+},
+"BGC0001018": {
+"mcnC:1": "3-amino-6-hydroxy-2-piperidone"
+},
+"BGC0001020": {
+"mur21:0": "lysine",
+"mur27:0": "glutamine",
+"mur8:0": "glycine"
+},
+"BGC0001021": {
+"Rv2383c:0": "serine"
+},
+"BGC0001023": {
+"mchC:1": "proline"
+},
+"BGC0001026": {
+"ACS68554.1:0": "proline"
+},
+"BGC0001027": {
+"NFA_7660:0": "valine",
+"NFA_7670:0": "lysine"
+},
+"BGC0001028": {
+"nosA:2": "proline",
+"nosD:0": "tyrosine"
+},
+"BGC0001033": {
+"ERIC2_c18040:0": "arginine",
+"ERIC2_c18060:0": "2,3-diaminopropionic acid",
+"ERIC2_c18110:1": "2,3-diaminopropionic acid"
+},
+"BGC0001035": {
+"GLAREA_10035:0": "ornithine",
+"GLAREA_10035:2": "4r-hydroxyproline",
+"GLAREA_10035:3": "3r-hydroxyhomotyrosine",
+"GLAREA_10035:4": "threonine",
+"GLAREA_10035:5": "3s-hydroxy-4s-methylproline"
+},
+"BGC0001036": {
+"AGZ15455.1:0": "valine",
+"AGZ15458.1:0": "piperazic acid",
+"AGZ15459.1:0": "piperazic acid",
+"AGZ15459.1:1": "piperazic acid",
+"AGZ15476.1:0": "valine"
+},
+"BGC0001039": {
+"pyrA:0": "3-hydroxypicolinic acid",
+"pyrE:1": "phenylalanine",
+"pyrG:0": "leucine"
+},
+"BGC0001041": {
+"Strop_1023:0": "3s-cyclohex-2-enylalanine"
+},
+"BGC0001042": {
+"sfaD:1": "valine",
+"sfaD:2": "pipecolic acid"
+},
+"BGC0001044": {
+"sirP:0": "tryptophan"
+},
+"BGC0001045": {
+"spiDE1:2": "isoleucine"
+},
+"BGC0001046": {
+"slgN1:0": "valine"
+},
+"BGC0001047": {
+"sylD:0": "ornithine"
+},
+"BGC0001054": {
+"XNC1_1711:0": "lysine"
+},
+"BGC0001057": {
+"NPS:0": "serine",
+"NPS:1": "arginine"
+},
+"BGC0001058": {
+"ACG60755.1:0": "arginine",
+"ACG60761.1:0": "glycine",
+"zbmIX:0": "alanine"
+},
+"BGC0001059": {
+"zmaK:0": "threonine",
+"zmaQ:0": "lysine",
+"zmaQ:1": "leucine"
+},
+"BGC0001061": {
+"pokL:0": "serine"
+},
+"BGC0001072": {
+"simD5:0": "tyrosine"
+},
+"BGC0001073": {
+"AFJ52660.1:0": "proline"
+},
+"BGC0001075": {
+"rauF:0": "phenylalanine"
+},
+"BGC0001078": {
+"BAE78973.1:0": "phenylalanine"
+},
+"BGC0001079": {
+"napB4:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0001083": {
+"mcl20:0": "proline"
+},
+"BGC0001088": {
+"albI:0": "para-aminobenzoic acid",
+"albI:2": "para-aminobenzoic acid",
+"albIX:0": "4-amino-2-hydroxy-3-isopropoxybenzoic acid",
+"albIX:1": "4-amino-2-hydroxy-3-isopropoxybenzoic acid",
+"albVII:0": "o-methyltyrosine"
+},
+"BGC0001095": {
+"RBAM_018380:0": "(s,e)-2-amino-4-decenoic acid",
+"RBAM_018440:0": "alanine"
+},
+"BGC0001101": {
+"AAN85501.1:0": "serine",
+"AAN85506.1:0": "piperazic acid",
+"LnmW:0": "tryptophan"
+},
+"BGC0001102": {
+"BTH_II2096:0": "alanine"
+},
+"BGC0001103": {
+"yngI:0": "leucine"
+},
+"BGC0001115": {
+"tmlU:0": "leucine"
+},
+"BGC0001117": {
+"hmtF:0": "threonine"
+},
+"BGC0001122": {
+"ATEG_00325:0": "leucine"
+},
+"BGC0001125": {
+"puwF:1": "glutamine"
+},
+"BGC0001128": {
+"plu3263:2": "phenylalanine",
+"plu3263:4": "leucine"
+},
+"BGC0001130": {
+"Xbud_02640:1": "phenylalanine"
+},
+"BGC0001142": {
+"ADY16689.1:0": "alanine",
+"ADY16697.1:0": "alanine"
+},
+"BGC0001143": {
+"ASPNIDRAFT_188806:0": "tyrosine"
+},
+"BGC0001147": {
+"dst18:0": "guanidinoacetic acid",
+"dst22:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0001150": {
+"SALB_00478:0": "valine"
+},
+"BGC0001152": {
+"fusA:2": "valine",
+"fusA:5": "alanine"
+},
+"BGC0001166": {
+"HTS1:2": "alanine"
+},
+"BGC0001172": {
+"clz14:0": "proline"
+},
+"BGC0001183": {
+"AGC09528.1:1": "2-chloro-3,5-dihydroxy-4-methylphenylglycine"
+},
+"BGC0001194": {
+"hitB:0": "valine",
+"hitE:0": "alanine"
+},
+"BGC0001202": {
+"AKA59431.1:0": "para-aminobenzoic acid"
+},
+"BGC0001205": {
+"PEXP_030520:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0001207": {
+"AJF34463.1:3": "glutamic acid",
+"AJF34464.1:3": "arginine"
+},
+"BGC0001212": {
+"ncyE:0": "valine",
+"ncyF:0": "tryptophan",
+"ncyF:1": "alanine"
+},
+"BGC0001214": {
+"AJV88375.1:0": "isoleucine",
+"AJV88376.1:0": "valine",
+"AJV88383.1:0": "proline"
+},
+"BGC0001216": {
+"spnF:0": "anthanillic acid"
+},
+"BGC0001220": {
+"ASPACDRAFT_42025:2": "proline",
+"ASPACDRAFT_42025:3": "3s,4s-dihydroxyhomotyrosine",
+"ASPACDRAFT_42025:5": "3s-hydroxy-4s-methylproline"
+},
+"BGC0001228": {
+"B110_RS0125715:0": "valine"
+},
+"BGC0001230": {
+"sln8:0": "isoleucine"
+},
+"BGC0001240": {
+"X797_010654:3": "serine",
+"X797_010654:5": "beta-alanine",
+"X797_010654:6": "lysine"
+},
+"BGC0001249": {
+"NPS6:0": "tryptophan"
+},
+"BGC0001250": {
+"sidN:2": "n5-trans-anhydromevalonyl-n5-hydroxyornithine"
+},
+"BGC0001261": {
+"AMT:0": "lysine",
+"AMT:1": "tryptophan"
+},
+"BGC0001288": {
+"makD1:0": "glutamic acid"
+},
+"BGC0001290": {
+"ANIA_02549:0": "leucine"
+},
+"BGC0001297": {
+"cal17:0": "tyrosine"
+},
+"BGC0001298": {
+"AGY30674.1:0": "tryptophan"
+},
+"BGC0001303": {
+"lobL:0": "tyrosine",
+"lobM:0": "alanine"
+},
+"BGC0001327": {
+"IH31_RS0100600:0": "3s-hydroxyasparagine",
+"IH31_RS0100615:0": "aspartic acid"
+},
+"BGC0001328": {
+"MCBG_00140:0": "3s-hydroxyasparagine",
+"MCBG_00143:0": "aspartic acid"
+},
+"BGC0001329": {
+"ctg1_orf18:0": "asparagine",
+"ctg1_orf4:0": "phenylalanine"
+},
+"BGC0001338": {
+"mrr8:0": "valine"
+},
+"BGC0001339": {
+"mfM9:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0001341": {
+"A7979_04520:1": "phenylalanine"
+},
+"BGC0001343": {
+"auaE:0": "proline",
+"auaEII:0": "homoserine"
+},
+"BGC0001349": {
+"AKD43754.1:0": "valine",
+"AKD43757.1:0": "alanine"
+},
+"BGC0001351": {
+"cahD:0": "3r-aminoisobutyric acid",
+"cahJ:0": "salicylic acid"
+},
+"BGC0001358": {
+"VFPBJ_02539:0": "proline",
+"VFPBJ_02539:1": "homotyrosine",
+"VFPBJ_02539:2": "leucine",
+"VFPBJ_02539:3": "2-aminoisobutyric acid",
+"VFPBJ_02539:6": "2-aminoisobutyric acid",
+"VFPBJ_02539:7": "2-aminoisobutyric acid"
+},
+"BGC0001365": {
+"CPUR_02680:0": "serine"
+},
+"BGC0001367": {
+"Hoch_0798:0": "alanine"
+},
+"BGC0001368": {
+"IF33_RS0114785:0": "tryptophan",
+"IF33_RS0114830:0": "lysine",
+"IF33_RS0114870:0": "2-methylserine"
+},
+"BGC0001371": {
+"aniA:3": "3r-hydroxyhomotyrosine",
+"aniA:5": "3s-hydroxy-4s-methylproline",
+"aniI:0": "valine"
+},
+"BGC0001379": {
+"BAU50944.1:0": "lysine"
+},
+"BGC0001381": {
+"AJO72702.1:0": "threonine"
+},
+"BGC0001397": {
+"WQO_33890:0": "aza-beta-tyrosine"
+},
+"BGC0001406": {
+"tlo21:3": "6-chlorotryptophan",
+"tlo21:4": "threonine"
+},
+"BGC0001409": {
+"dutL:0": "serine"
+},
+"BGC0001413": {
+"cysG:0": "4-amino-2-hydroxy-3-isopropoxybenzoic acid",
+"cysG:1": "para-aminobenzoic acid",
+"cysK:0": "para-aminobenzoic acid",
+"cysK:1": "para-aminobenzoic acid",
+"cysK:2": "tyrosine",
+"cysK:3": "para-aminobenzoic acid",
+"cysL:0": "valine"
+},
+"BGC0001414": {
+"griA:1": "proline",
+"griA:4": "proline"
+},
+"BGC0001419": {
+"mchC:1": "alanine"
+},
+"BGC0001420": {
+"APZ78718.1:0": "alaninol"
+},
+"BGC0001429": {
+"mchC:1": "alanine"
+},
+"BGC0001430": {
+"mchC:1": "proline"
+},
+"BGC0001431": {
+"mchC:1": "alanine"
+},
+"BGC0001432": {
+"mchC:1": "alanine"
+},
+"BGC0001437": {
+"obaI:1": "2,3-dihydroxybenzoic acid"
+},
+"BGC0001439": {
+"B9W62_32075:0": "valine"
+},
+"BGC0001443": {
+"G339_RS0128910:0": "piperazic acid"
+},
+"BGC0001445": {
+"AFLA_066840:0": "phenylalanine"
+},
+"BGC0001448": {
+"mlcA:0": "2,4-diaminobutyric acid",
+"mlcK:0": "3s-methylaspartic acid",
+"mlcL:1": "aspartic acid branched",
+"mlcL:2": "aspartic acid",
+"mlcL:4": "3s-methylaspartic acid",
+"mlcM:1": "proline"
+},
+"BGC0001449": {
+"MYCTH_68164:0": "glutamine"
+},
+"BGC0001451": {
+"BCRE_RS14175:1": "tyrosine"
+},
+"BGC0001455": {
+"antaF:0": "anthanillic acid"
+},
+"BGC0001457": {
+"ctg1_orf17:0": "phenylalanine"
+},
+"BGC0001491": {
+"BG844_00075:0": "para-aminobenzoic acid"
+},
+"BGC0001502": {
+"AHA_2474:0": "phenylalanine"
+},
+"BGC0001517": {
+"ATEG_09068:0": "4r-propylproline"
+},
+"BGC0001519": {
+"STRAU_0332:0": "leucine",
+"STRAU_0335:0": "piperazic acid",
+"STRAU_0335:1": "serine",
+"STRAU_0349:0": "isoleucine"
+},
+"BGC0001523": {
+"azl4:0": "tryptophan"
+},
+"BGC0001532": {
+"ATY37590.1:0": "isoleucine",
+"ATY37590.1:1": "isoleucine"
+},
+"BGC0001544": {
+"P168DRAFT_323099:0": "tyrosine"
+},
+"BGC0001545": {
+"FGSG_11395:0": "tryptophan"
+},
+"BGC0001561": {
+"AQI70_32580:0": "6-chlorotryptophan"
+},
+"BGC0001563": {
+"BAZ95823.1:0": "malic acid"
+},
+"BGC0001569": {
+"SNOUR_12640:0": "asparagine",
+"SNOUR_12645:1": "leucine",
+"SNOUR_12645:3": "6-chlorotryptophan"
+},
+"BGC0001574": {
+"ATY72527.1:0": "isoleucine"
+},
+"BGC0001575": {
+"RSAG_RS12305:0": "leucine",
+"RSAG_RS12305:1": "leucine",
+"RSAG_RS12305:2": "leucine"
+},
+"BGC0001580": {
+"SCN11954.1:0": "alanine"
+},
+"BGC0001582": {
+"AIW58892.1:10": "isoleucine"
+},
+"BGC0001584": {
+"ANY94451.1:0": "beta-tyrosine"
+},
+"BGC0001593": {
+"ARF06222.1:0": "(2s,6r)-diamino-(5r,7)-dihydroxy-heptanoic acid"
+},
+"BGC0001611": {
+"gnmS:0": "alanine"
+},
+"BGC0001620": {
+"ASX95241.1:0": "2-amino-3,5-dimethyl-4-hexenoic acid",
+"ASX95241.1:2": "tyrosine",
+"ASX95241.1:6": "phenylalanine"
+},
+"BGC0001628": {
+"orf4:1": "aspartic acid"
+},
+"BGC0001630": {
+"kasA:0": "cinnamic acid",
+"kasC:1": "phenylalanine"
+},
+"BGC0001631": {
+"makasA:0": "cinnamic acid",
+"makasC:1": "phenylalanine"
+},
+"BGC0001636": {
+"TRAF135001:0": "glycine",
+"TRAF135001:9": "2r-hydroxy-3-methylpentanoic acid"
+},
+"BGC0001652": {
+"lim1:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0001657": {
+"lesB:3": "isoleucine"
+},
+"BGC0001662": {
+"cleE:0": "tyrosine"
+},
+"BGC0001667": {
+"mcyB:1": "3s-methyl-d-aspartic acid branched"
+},
+"BGC0001668": {
+"ANIA_03396:0": "4-hydroxyphenylpyruvic acid"
+},
+"BGC0001671": {
+"Rhz6:0": "homotyrosine",
+"Rhz6:1": "2,3-diaminopropionic acid"
+},
+"BGC0001672": {
+"FlavM3f:0": "glycine"
+},
+"BGC0001675": {
+"AQW35054.1:0": "phenylalanine"
+},
+"BGC0001692": {
+"XNC1_RS09410:0": "valine"
+},
+"BGC0001695": {
+"natF:0": "anthanillic acid"
+},
+"BGC0001700": {
+"npm6:0": "tryptophan"
+},
+"BGC0001705": {
+"ndaA:1": "3s-methyl-d-aspartic acid branched"
+},
+"BGC0001716": {
+"XNC2_2370:0": "lysine",
+"XNC2_2370:1": "arginine",
+"XNC2_2373:0": "2,4-diaminobutyric acid"
+},
+"BGC0001738": {
+"phm1:0": "tyrosine"
+},
+"BGC0001740": {
+"BBA21084.1:0": "glutamic acid"
+},
+"BGC0001741": {
+"phyS:0": "serine"
+},
+"BGC0001755": {
+"rdmN:0": "alanine"
+},
+"BGC0001763": {
+"rufT:0": "2-amino-3,5-dimethyl-4-hexenoic acid",
+"rufT:2": "tyrosine",
+"rufT:6": "phenylalanine"
+},
+"BGC0001768": {
+"NECHADRAFT_106280:2": "valine"
+},
+"BGC0001770": {
+"ANH11404.1:0": "alanine",
+"ANH11405.1:0": "aspartic acid"
+},
+"BGC0001780": {
+"ARR97036.1:0": "beta-alanine"
+},
+"BGC0001790": {
+"sulM:1": "2,3-diaminopropionic acid"
+},
+"BGC0001792": {
+"XNR_3446:2": "isoleucine",
+"XNR_3449:1": "isoleucine"
+},
+"BGC0001794": {
+"swnK:0": "pipecolic acid"
+},
+"BGC0001806": {
+"APU91751.1:3": "homoserine"
+},
+"BGC0001807": {
+"ATL73036.1:3": "valine"
+},
+"BGC0001816": {
+"AQM58276.1:0": "4-hydroxyphenylpyruvic acid",
+"benY:0": "anthranilic acid",
+"benZ:0": "phenylalanine",
+"benZ:1": "anthanillic acid"
+},
+"BGC0001818": {
+"vzb7:0": "2-methylserine"
+},
+"BGC0001820": {
+"verP:0": "tryptophan"
+},
+"BGC0001853": {
+"ctg3_34:0": "leucine"
+},
+"BGC0001857": {
+"QBE85649.1:0": "phenylalanine"
+},
+"BGC0001869": {
+"Xsze_03183:0": "serine"
+},
+"BGC0001881": {
+"pyiS:0": "phenylalanine"
+},
+"BGC0001890": {
+"VIBHAR_01379:0": "homoserine"
+},
+"BGC0001909": {
+"str10:0": "alanine"
+},
+"BGC0001919": {
+"natI:0": "anthanillic acid"
+},
+"BGC0001942": {
+"mloJ:0": "2,3-diaminopropionic acid"
+},
+"BGC0001956": {
+"mhr9:0": "serine"
+},
+"BGC0001957": {
+"amcH:0": "valine"
+},
+"BGC0001963": {
+"AZF85929.1:0": "asparagine",
+"AZF85930.1:0": "alanine",
+"AZF85933.1:0": "butyric acid",
+"AZF85940.1:1": "tyrosine",
+"AZF85940.1:2": "glutamine",
+"AZF85944.1:0": "proline"
+},
+"BGC0001999": {
+"BGRAMDRAFT_RS22640:0": "threonine",
+"BGRAMDRAFT_RS22645:1": "threonine"
+},
+"BGC0002037": {
+"PA3327:1": "proline"
+},
+"BGC0002042": {
+"ant22:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0002054": {
+"apmA1:0": "valine"
+},
+"BGC0002055": {
+"mycH:0": "arginine"
+},
+"BGC0002071": {
+"CWE01_RS05100:2": "isoleucine"
+},
+"BGC0002072": {
+"M444_04780:0": "tryptophan"
+},
+"BGC0002078": {
+"QEO74982.1:3": "6-chlorotryptophan",
+"QEO74982.1:4": "tryptophan",
+"QEO74983.1:1": "3-hydroxy-4-methylproline"
+},
+"BGC0002079": {
+"QEO75075.1:2": "alanine",
+"QEO75075.1:3": "6-chlorotryptophan",
+"QEO75075.1:4": "valine",
+"QEO75077.1:1": "3-hydroxy-4-methylproline"
+},
+"BGC0002089": {
+"SCAB_31781:0": "phenylalanine"
+},
+"BGC0002095": {
+"ACS04_34650:0": "valine"
+},
+"BGC0002098": {
+"AORI_2941:0": "leucine",
+"AORI_2952:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0002100": {
+"DBP21_21545:0": "aspartic acid"
+},
+"BGC0002101": {
+"hrnJ:0": "valine",
+"hrnL:0": "alanine"
+},
+"BGC0002107": {
+"Atu3675:0": "tyrosine"
+},
+"BGC0002108": {
+"cip22:2": "leucine",
+"cip23:0": "leucine",
+"cip24:0": "leucine"
+},
+"BGC0002109": {
+"QDJ74293.1:0": "4-hydroxyphenylpyruvic acid"
+},
+"BGC0002114": {
+"MSR10575_88410:1": "2,3-diaminopropionic acid"
+},
+"BGC0002125": {
+"frsG:1": "threonine"
+},
+"BGC0002129": {
+"QVQ68786.1:0": "serine"
+},
+"BGC0002135": {
+"XBJ1_RS10015:0": "leucine",
+"XBJ1_RS10015:2": "tyrosine"
+},
+"BGC0002136": {
+"YC6258_RS24460:0": "alanine"
+},
+"BGC0002149": {
+"aceN:0": "n5-trans-anhydromevalonyl-n5-hydroxyornithine"
+},
+"BGC0002157": {
+"F9C07_2283794:0": "proline",
+"F9C07_2283794:1": "n-methyl-l-phenylalanine"
+},
+"BGC0002164": {
+"perA:0": "isoleucine"
+},
+"BGC0002171": {
+"ASPNIDRAFT_41846:0": "phenylalanine"
+},
+"BGC0002172": {
+"FGSG_10990:0": "piperazic acid"
+},
+"BGC0002186": {
+"FGSG_08209:1": "serine"
+},
+"BGC0002188": {
+"FPSE_09183:0": "isoleucine",
+"FPSE_09183:5": "serine"
+},
+"BGC0002197": {
+"QBK15049.1:0": "tyrosine"
+},
+"BGC0002198": {
+"FAC38_35:0": "leucine",
+"FAC38_35:1": "anthranilic acid"
+},
+"BGC0002203": {
+"BBA_08221:0": "leucine",
+"BBA_08222:0": "phenylalanine"
+},
+"BGC0002208": {
+"HK57_00065:0": "anthranilic acid",
+"HK57_00065:1": "tryptophan"
+},
+"BGC0002210": {
+"pyvA:0": "2-aminoisobutyric acid"
+},
+"BGC0002226": {
+"ASPACDRAFT_46595:0": "phenylalanine"
+},
+"BGC0002230": {
+"tolA:0": "tyrosine"
+},
+"BGC0002235": {
+"MGG_12447:0": "serine",
+"MGG_15097:0": "phenylalanine"
+},
+"BGC0002238": {
+"AO090102000165:0": "tryptophan"
+},
+"BGC0002242": {
+"HK57_00503:0": "anthranilic acid",
+"HK57_00503:1": "alanine",
+"HK57_00503:2": "lysine"
+},
+"BGC0002248": {
+"G4B84_005468:0": "2s-amino-dodecanoic acid"
+},
+"BGC0002250": {
+"PTRG_04244:0": "tyrosine"
+},
+"BGC0002254": {
+"NotE:1": "tryptophan"
+},
+"BGC0002256": {
+"fscA:0": "threonine"
+},
+"BGC0002259": {
+"CCM_01284:0": "leucine"
+},
+"BGC0002261": {
+"luc5:0": "proline"
+},
+"BGC0002264": {
+"BBP40_009477:0": "alanine"
+},
+"BGC0002272": {
+"ATEG_10305:0": "tryptophan"
+},
+"BGC0002273": {
+"ATEG_02815:0": "phenylpyruvic acid",
+"ATEG_02831:0": "alanine"
+},
+"BGC0002275": {
+"BO96DRAFT_451379:0": "phenylalanine"
+},
+"BGC0002277": {
+"greA:0": "4-hydroxyphenylpyruvic acid"
+},
+"BGC0002288": {
+"HUT15_07650:0": "tyrosine"
+},
+"BGC0002293": {
+"ohmA:8": "threonine"
+},
+"BGC0002324": {
+"JQX13_35810:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0002327": {
+"bolH:1": "isoleucine",
+"bolH:2": "homoserine"
+},
+"BGC0002329": {
+"FNF07_04270:0": "threonine",
+"FNF07_04275:1": "threonine",
+"FNF07_04275:4": "serine"
+},
+"BGC0002336": {
+"H9D14_RS10900:1": "isoleucine",
+"H9D14_RS10900:2": "homoserine"
+},
+"BGC0002342": {
+"iso8:0": "leucine"
+},
+"BGC0002348": {
+"ATEG_03563:0": "4-hydroxyphenylpyruvic acid"
+},
+"BGC0002350": {
+"J7W19_00460:0": "arginine",
+"J7W19_00460:1": "glycine"
+},
+"BGC0002356": {
+"medE:0": "tyrosine"
+},
+"BGC0002357": {
+"nmdO:0": "tryptophan"
+},
+"BGC0002358": {
+"XNR_0983:1": "threonine",
+"XNR_0985:0": "beta-hydroxyenduracididine"
+},
+"BGC0002360": {
+"UEF20580.1:0": "5-methoxytyrosine"
+},
+"BGC0002364": {
+"AYM48693.1:0": "phenylalanine"
+},
+"BGC0002366": {
+"QIC03935.1:0": "para-aminobenzoic acid",
+"QIC03945.1:0": "cysteine"
+},
+"BGC0002367": {
+"SCAB_3321:0": "serine",
+"SCAB_3321:2": "asparagine"
+},
+"BGC0002370": {
+"AGRA3207_002706:1": "leucine"
+},
+"BGC0002372": {
+"mrtE:0": "para-aminobenzoic acid"
+},
+"BGC0002373": {
+"bnvD:1": "4r-methylproline",
+"bnvD:2": "valine",
+"bnvO:1": "proline"
+},
+"BGC0002376": {
+"bomJ:0": "aspartic acid"
+},
+"BGC0002377": {
+"QBA57735.1:1": "tyrosine",
+"QBA57737.1:0": "serine"
+},
+"BGC0002378": {
+"copB:2": "serine",
+"copB:3": "asparagine"
+},
+"BGC0002379": {
+"PRtIB026_34290:0": "alanine"
+},
+"BGC0002408": {
+"GN109_07690:0": "serine",
+"GN109_07695:0": "n5-formyl-n5-hydroxyornithine"
+},
+"BGC0002410": {
+"IHE48_18570:0": "salicylic acid"
+},
+"BGC0002414": {
+"JJO56_07675:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0002416": {
+"var3:0": "arginine",
+"var5:0": "aspartic acid",
+"var7:0": "n5-hydroxyornithine",
+"var7:1": "n5-acetyl-n5-hydroxyornithine"
+},
+"BGC0002417": {
+"VAPA_1c38710:0": "n5-formyl-n5-hydroxyornithine"
+},
+"BGC0002418": {
+"S7S_05315:0": "aspartic acid",
+"S7S_05320:0": "arginine",
+"S7S_05325:0": "n5-acetyl-n5-hydroxyornithine",
+"S7S_05335:0": "cysteine"
+},
+"BGC0002420": {
+"Vapar_3746:0": "n5-formyl-n5-hydroxyornithine"
+},
+"BGC0002422": {
+"SAMN04490204_1457:1": "glutamine"
+},
+"BGC0002430": {
+"gauA:0": "3r-aminoisobutyric acid",
+"gauA:2": "kynurenine",
+"gauA:4": "tyrosine",
+"gauB:0": "2,4-diaminobutyric acid",
+"gauC:4": "kynurenine",
+"orf48:0": "aspartic acid"
+},
+"BGC0002433": {
+"Avin_25570:0": "homoserine",
+"Avin_25570:1": "arginine"
+},
+"BGC0002440": {
+"QUJ09166.1:1": "leucine"
+},
+"BGC0002441": {
+"orf3:0": "phenylpyruvic acid"
+},
+"BGC0002443": {
+"mymF:0": "salicylic acid"
+},
+"BGC0002448": {
+"orf22:3": "tyrosine",
+"orf23:0": "serine"
+},
+"BGC0002451": {
+"QGY73453.1:0": "serine"
+},
+"BGC0002454": {
+"QRI43520.1:0": "valine"
+},
+"BGC0002455": {
+"SKB24610.1:0": "tyrosine"
+},
+"BGC0002465": {
+"ABO_2092:0": "n5-hydroxyornithine",
+"ABO_2093:1": "n5-hydroxyornithine",
+"ABO_2093:2": "n5-hydroxyornithine"
+},
+"BGC0002479": {
+"mihB6:0": "serine"
+},
+"BGC0002491": {
+"TW75_20430:0": "2,3-dihydroxybenzoic acid",
+"TW75_20440:0": "lysine"
+},
+"BGC0002492": {
+"MXAN_3645:0": "nicotinic acid"
+},
+"BGC0002502": {
+"FUM10:0": "glycine",
+"FUM16:0": "beta-hydroxytyrosine"
+},
+"BGC0002503": {
+"QPB41096.1:0": "tyrosine"
+},
+"BGC0002505": {
+"QOJ72663.1:0": "tyrosine"
+},
+"BGC0002512": {
+"aptC:0": "homotyrosine"
+},
+"BGC0002517": {
+"triF:0": "aspartic acid",
+"triG:0": "alanine"
+},
+"BGC0002518": {
+"GE543_00950:0": "isoleucine"
+},
+"BGC0002520": {
+"BCK51628.1:0": "glycine",
+"BCK51655.1:0": "proline",
+"BCK51658.1:0": "leucine"
+},
+"BGC0002521": {
+"psoB:1": "serine"
+},
+"BGC0002523": {
+"dstD:0": "4-acetamidopyrrole-2-carboxylic acid"
+},
+"BGC0002528": {
+"AvCA_21190:0": "lysine"
+},
+"BGC0002529": {
+"AvCA_09680:0": "lysine"
+},
+"BGC0002532": {
+"NIES19_13710:0": "para-aminobenzoic acid",
+"NIES19_13780:0": "3-hydroxytyrosine"
+},
+"BGC0002538": {
+"chaA:0": "glycine"
+},
+"BGC0002543": {
+"nrps:0": "4,5-dihydroxyornithine",
+"nrps:2": "4r-hydroxyproline",
+"nrps:3": "3r-hydroxyhomotyrosine",
+"nrps:4": "3-hydroxyglutamine",
+"nrps:5": "3s-hydroxy-4s-methylproline"
+},
+"BGC0002544": {
+"AMET_0598:0": "salicylic acid"
+},
+"BGC0002555": {
+"emeB:12": "2-aminoisobutyric acid",
+"emeB:14": "phenylalanine",
+"emeB:2": "proline",
+"emeB:3": "2-aminoisobutyric acid",
+"emeB:5": "proline",
+"emeB:6": "2-aminoisobutyric acid",
+"emeB:7": "2-aminoisobutyric acid",
+"emeB:9": "alanine"
+},
+"BGC0002563": {
+"CUJ87_10415:0": "threonine",
+"CUJ87_10420:1": "threonine"
+},
+"BGC0002564": {
+"FNZ07_17565:3": "threonine",
+"FNZ07_17570:0": "threonine"
+},
+"BGC0002565": {
+"BGL_2c16980:0": "threonine",
+"BGL_2c16990:1": "glutamic acid",
+"BGL_2c16990:2": "threonine"
+},
+"BGC0002569": {
+"BCAL1696:0": "serine",
+"BCAL1697:0": "n5-formyl-n5-hydroxyornithine"
+},
+"BGC0002572": {
+"JYQ62_16310:5": "tyrosine",
+"JYQ62_16330:1": "tyrosine",
+"JYQ62_16335:0": "homoserine",
+"JYQ62_16355:3": "homoserine"
+},
+"BGC0002581": {
+"QKF54438.1:0": "5-methoxytyrosine"
+},
+"BGC0002582": {
+"QUF98525.1:0": "leucine"
+},
+"BGC0002591": {
+"ARM20260.1:0": "para-aminobenzoic acid"
+},
+"BGC0002611": {
+"AKJ70942.1:3": "homotyrosine",
+"AKJ70942.1:4": "threonine",
+"AKJ70942.1:5": "3s-hydroxy-4s-methylproline",
+"AKJ70945.1:0": "linoleic acid"
+},
+"BGC0002613": {
+"JYA62_15760:0": "salicylic acid"
+},
+"BGC0002617": {
+"AMQ36132.1:0": "leucine",
+"AMQ36132.1:1": "2-aminoisobutyric acid",
+"AMQ36134.1:0": "anthranilic acid"
+},
+"BGC0002623": {
+"IQ234_09885:0": "homotyrosine",
+"IQ234_09890:1": "tyrosine"
+},
+"BGC0002625": {
+"IQ276_029105:4": "tyrosine"
+},
+"BGC0002634": {
+"UHH90022.1:0": "alanine",
+"UHH90023.1:0": "aspartic acid"
+},
+"BGC0002654": {
+"UHJ79948.1:0": "3-hydroxy-para-aminobenzoic acid",
+"UHJ79948.1:1": "para-aminobenzoic acid",
+"UHJ79951.1:0": "para-aminobenzoic acid",
+"UHJ79951.1:4": "para-aminobenzoic acid"
+},
+"BGC0002660": {
+"SAMN04488128_1011792:4": "proline"
+},
+"BGC0002661": {
+"tsk11:0": "phenylalanine"
+},
+"BGC0002675": {
+"CWC22_013945:0": "proline"
+},
+"BGC0002693": {
+"DCC84_23175:0": "n5-formyl-n5-hydroxyornithine"
+},
+"BGC0002735": {
+"ABB07_39125:0": "piperazic acid",
+"ABB07_39195:0": "3s-hydroxyleucine"
+},
+"BGC0002749": {
+"BDW47DRAFT_71441:0": "glycine"
+},
+"BGC0002752": {
+"SAMN05216222_4719:1": "glutamic acid"
+},
+"BGC0002755": {
+"N7L95_26265:4": "leucine"
+},
+"BGC0002760": {
+"mxvC:0": "valine"
+},
+"BGC0002765": {
+"mycA:1": "homoserine"
+},
+"BGC0002775": {
+"KSS94_12765:2": "serine"
+},
+"BGC0002779": {
+"U873_RS0121080:0": "valine"
+},
+"BGC0002808": {
+"SCAB_79641:0": "4-hydroxyphenylglycine"
+},
+"BGC0002810": {
+"htm5:1": "valine"
+},
+"BGC0002815": {
+"J3U88_09295:0": "leucine",
+"J3U88_09305:1": "2-aminoadipic acid",
+"J3U88_09320:0": "tyrosine"
+},
+"BGC0002850": {
+"lnzpD:0": "alanine",
+"lnzpD:2": "leucine",
+"lnzpD:4": "piperazic acid",
+"lnzpD:6": "isoleucine",
+"lnzpD:8": "beta-alanine",
+"lnzpD:9": "valine"
+},
+"BGC0002862": {
+"UUG66791.1:0": "alanine"
+},
+"BGC0002868": {
+"lnzpD:0": "alanine",
+"lnzpD:2": "leucine",
+"lnzpD:4": "piperazic acid",
+"lnzpD:6": "isoleucine",
+"lnzpD:8": "beta-alanine",
+"lnzpD:9": "valine"
+},
+"BGC0002869": {
+"HXS80_03465:0": "4-hydroxyphenylpyruvic acid"
+},
+"BGC0002871": {
+"bpln_1g11310:2": "serine",
+"bpln_1g11310:3": "serine",
+"bpln_1g11310:4": "para-aminobenzoic acid"
+},
+"BGC0002873": {
+"H9D14_RS04825:0": "tyrosine"
+},
+"BGC0002877": {
+"CCM_09341:0": "glutamic acid"
+},
+"BGC0002879": {
+"UUG66741.1:1": "cysteine",
+"UUG66743.1:0": "leucine"
+},
+"BGC0002880": {
+"dysG:0": "2-carboxy-6-hydroxyoctahydroindole"
+},
+"BGC0002881": {
+"H9D14_RS00885:0": "alanine"
+},
+"BGC0002904": {
+"fum10:0": "3s-methylproline"
+},
+"BGC0002912": {
+"srbK:0": "salicylic acid"
+},
+"BGC0002919": {
+"BEV36868.1:0": "3s-cyclohex-2-enylalanine",
+"cirA10:0": "leucine",
+"cirA6:0": "piperazic acid",
+"cirA7:0": "serine"
+},
+"BGC0002931": {
+"B9W62_RS00025:0": "3s-hydroxyleucine",
+"B9W62_RS00090:1": "piperazic acid",
+"B9W62_RS00130:0": "threonine"
+},
+"BGC0002948": {
+"azl4:0": "tryptophan"
+},
+"BGC0002949": {
+"P0078_09205:0": "tyrosine",
+"P0078_09210:0": "arginine"
+},
+"BGC0002950": {
+"aesC:0": "phenylalanine"
+},
+"BGC0002955": {
+"LQF30_11905:0": "piperazic acid"
+},
+"BGC0002957": {
+"mypA:0": "valine",
+"mypA:1": "4r-methylproline",
+"mypA:4": "4r-methylproline",
+"mypA:5": "leucine",
+"mypB:0": "valine"
+},
+"BGC0002959": {
+"IEZ17_RS15985:0": "lysine"
+},
+"BGC0002961": {
+"amcH:0": "valine"
+},
+"BGC0002974": {
+"OEB96_38910:1": "tyrosine",
+"OEB96_38910:2": "phenylalanine"
+},
+"BGC0002977": {
+"BG616_01865:0": "glutamic acid",
+"BG616_05220:0": "valine",
+"BG616_09355:0": "proline",
+"BG616_13555:0": "leucine",
+"BG616_14080:0": "tyrosine",
+"BG616_14145:0": "proline",
+"BG616_14695:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0002978": {
+"lnzsD:0": "alanine",
+"lnzsD:2": "leucine",
+"lnzsD:4": "piperazic acid",
+"lnzsD:6": "isoleucine",
+"lnzsD:8": "beta-alanine",
+"lnzsD:9": "valine"
+},
+"BGC0002989": {
+"P3339_18410:0": "asparagine",
+"P3339_18415:0": "isoleucine"
+},
+"BGC0002991": {
+"MMF93_23565:0": "alanine"
+},
+"BGC0002994": {
+"OYE22_02425:3": "n5-formyl-n5-hydroxyornithine",
+"OYE22_02430:0": "histidine"
+},
+"BGC0002995": {
+"PscyB:0": "anthranilic acid",
+"PscyB:2": "tryptophan",
+"PscyB:4": "tryptophan"
+},
+"BGC0002996": {
+"vdoB:0": "leucine",
+"vdoB:1": "alanine"
+},
+"BGC0003007": {
+"ociA:0": "homotyrosine",
+"ociB:0": "homotyrosine",
+"ociB:1": "3-amino-6-hydroxy-2-piperidone"
+},
+"BGC0003010": {
+"rhzB:1": "phenylalanine",
+"rhzB:2": "valine",
+"rhzB:4": "phenylalanine"
+},
+"BGC0003017": {
+"MPH_07619:0": "4-hydroxyphenylglycine"
+},
+"BGC0003023": {
+"AAW51_3371:0": "alanine",
+"AAW51_3371:2": "alanine",
+"AAW51_3371:3": "alanine",
+"AAW51_3371:5": "arginine"
+},
+"BGC0003025": {
+"NQD60_06915:1": "tyrosine",
+"NQD60_06915:3": "tyrosine"
+},
+"BGC0003028": {
+"QBK15049.1:0": "serine"
+},
+"BGC0003040": {
+"ajuD:0": "serine"
+},
+"BGC0003042": {
+"NUT86_05760:0": "serine",
+"NUT86_06025:0": "isoleucine"
+},
+"BGC0003048": {
+"TMO_b0323:2": "threonine",
+"TMO_b0323:3": "lysine",
+"TMO_b0325:0": "aspartic acid"
+},
+"BGC0003053": {
+"mpbA:2": "isoleucine",
+"mpbA:3": "valine",
+"mpbA:4": "valine"
+},
+"BGC0003058": {
+"mpcA:0": "leucine",
+"mpcA:1": "isoleucine",
+"mpcA:2": "valine"
+},
+"BGC0003067": {
+"nonL:0": "tryptophan"
+},
+"BGC0003072": {
+"FGSG_02315:3": "arginine",
+"FGSG_02315:4": "threonine"
+},
+"BGC0003075": {
+"KALB_2251:0": "valine",
+"KALB_2256:0": "2,3-dihydroxybenzoic acid"
+},
+"BGC0003076": {
+"EURHEDRAFT_472053:0": "alanine"
+},
+"BGC0003114": {
+"WAS29225.1:0": "glutamic acid"
+},
+"BGC0003130": {
+"AOL_s00215g415:0": "alanine"
+},
+"BGC0003143": {
+"NYF13_13205:0": "alanine",
+"NYF13_13210:0": "aspartic acid"
+},
+"BGC0003145": {
+"MPH_07623:0": "enduracididine"
+},
+"BGC0003156": {
+"AGR39412.1:0": "arginine"
+},
+"BGC0003161": {
+"lpsA:1": "phenylalanine"
+},
+"BGC0003162": {
+"C2857_007939:0": "glutamine"
+},
+"BGC0003165": {
+"BAU50944.1:0": "lysine"
+},
+"BGC0003168": {
+"pek18:0": "4-hydroxyphenylglycine"
+}
+}

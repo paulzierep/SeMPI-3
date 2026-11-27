@@ -200,19 +200,6 @@ def plot_quality(df: pd.DataFrame, theme: Theme, path: Path) -> Path:
             # Direct label where the curve crosses its own target height, so
             # identity does not rest on colour and labels never collide.
             _label_on_curve(ax, x, y, label_heights[arm], ARM_SHORT[arm], theme)
-        # The oracle is drawn dashed in the SeMPI-3 hue: same predictor, but
-        # allowed to pick the release mechanism in hindsight.
-        oracle_column = f"sempi3_antismash_oracle_{metric}"
-        if oracle_column in df:
-            x, y = _survival(df[oracle_column].tolist())
-            ax.plot(
-                x,
-                y,
-                color=theme.series["sempi3_antismash"],
-                linewidth=1.4,
-                linestyle=(0, (4, 3)),
-                label="SeMPI-3, release chosen in hindsight",
-            )
         _title(ax, title, subtitle, theme)
         ax.set_xlabel("score", color=theme.text_secondary, fontsize=9)
         ax.set_ylabel("clusters scoring at least x", color=theme.text_secondary, fontsize=9)
@@ -220,8 +207,8 @@ def plot_quality(df: pd.DataFrame, theme: Theme, path: Path) -> Path:
         ax.set_xlim(0, 1.0)
 
     handles, labels = axes[0].get_legend_handles_labels()
-    fig.tight_layout(rect=[0, 0.13, 1, 0.90])
-    _figure_legend(fig, handles, labels, theme, ncol=2)
+    fig.tight_layout(rect=[0, 0.10, 1, 0.90])
+    _figure_legend(fig, handles, labels, theme, ncol=3)
     return _save(fig, path, theme)
 
 

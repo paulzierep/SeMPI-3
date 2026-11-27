@@ -143,10 +143,19 @@ def _release_modes(spec: ClusterSpec, chain: Chain) -> List[str]:
     return modes
 
 
+#: Release label from a structure-trained model -> the variant to report.
+RELEASE_LABELS = {
+    "linear": RELEASE_HYDROLYSIS,
+    "macrolactone": RELEASE_MACROLACTONE,
+    "macrolactam": RELEASE_MACROLACTAM,
+}
+
+
 def assemble(
     spec: ClusterSpec,
     assume_acetyl_starter: bool = True,
     skip_unknown_substrates: bool = False,
+    release_override: Optional[str] = None,
 ) -> Prediction:
     """Build the backbone encoded by ``spec``.
 
@@ -156,6 +165,9 @@ def assemble(
             module, prime the chain with acetyl, as most assembly lines do.
         skip_unknown_substrates: Carry on when an NRPS module has no substrate,
             leaving a gap, instead of giving up on the cluster.
+        release_override: Release mechanism chosen by a model, either a variant
+            name or a label such as ``"macrolactone"``. Falls back to the
+            domain rule when the named variant could not be built.
     """
     prediction = Prediction(bgc_id=spec.bgc_id, notes=list(spec.notes))
     if not spec.modules:
@@ -194,7 +206,11 @@ def assemble(
     if not prediction.variants:
         prediction.failed = True
         return prediction
-    prediction.release = choose_release(spec, prediction.variants)
+    override = RELEASE_LABELS.get(release_override or "", release_override)
+    if override and override in prediction.variants:
+        prediction.release = override
+    else:
+        prediction.release = choose_release(spec, prediction.variants)
     prediction.smiles = prediction.variants[prediction.release]
     return prediction
 

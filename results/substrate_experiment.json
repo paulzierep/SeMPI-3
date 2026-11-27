@@ -1,0 +1,73 @@
+[
+  {
+    "variant": "antiSMASH (baseline)",
+    "n": 2680,
+    "correct": 1781,
+    "abstained": 415,
+    "accuracy": 0.6646,
+    "accuracy_when_called": 0.7863
+  },
+  {
+    "variant": "Stachelhaus 9-aa, MIBiG only",
+    "n": 2680,
+    "correct": 1582,
+    "abstained": 0,
+    "extra_training_rows": 0,
+    "accuracy": 0.5903,
+    "accuracy_when_called": 0.5903
+  },
+  {
+    "variant": "Extended 34-aa, MIBiG only",
+    "n": 2680,
+    "correct": 1488,
+    "abstained": 0,
+    "extra_training_rows": 0,
+    "accuracy": 0.5552,
+    "accuracy_when_called": 0.5552
+  },
+  {
+    "variant": "Extended 34-aa, MIBiG + PARAS",
+    "n": 2680,
+    "correct": 1625,
+    "abstained": 0,
+    "extra_training_rows": 2469,
+    "accuracy": 0.6063,
+    "accuracy_when_called": 0.6063
+  },
+  {
+    "variant": "Random forest 34-aa, MIBiG only",
+    "n": 2680,
+    "correct": 1651,
+    "abstained": 0,
+    "extra_training_rows": 0,
+    "accuracy": 0.616,
+    "accuracy_when_called": 0.616
+  },
+  {
+    "variant": "Random forest 34-aa, MIBiG + PARAS",
+    "n": 2680,
+    "correct": 1711,
+    "abstained": 0,
+    "extra_training_rows": 2469,
+    "accuracy": 0.6384,
+    "accuracy_when_called": 0.6384
+  },
+  {
+    "variant": "antiSMASH leads, nearest fills its gaps",
+    "n": 2680,
+    "correct": 1915,
+    "abstained": 0,
+    "extra_training_rows": 2469,
+    "accuracy": 0.7146,
+    "accuracy_when_called": 0.7146
+  },
+  {
+    "variant": "antiSMASH leads, forest fills its gaps",
+    "n": 2680,
+    "correct": 1913,
+    "abstained": 0,
+    "extra_training_rows": 2469,
+    "accuracy": 0.7138,
+    "accuracy_when_called": 0.7138
+  }
+]

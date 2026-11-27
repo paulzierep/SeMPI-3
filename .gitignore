@@ -1,6 +1,7 @@
 # Downloaded data: fetched by scripts/fetch_data.sh, never committed
 data/raw/
 data/interim/
+data/external/
 
 # Python
 __pycache__/

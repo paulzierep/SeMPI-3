@@ -77,6 +77,7 @@ class AntismashRecord:
     spec: ClusterSpec
     baseline_smiles: List[str] = field(default_factory=list)
     products: List[str] = field(default_factory=list)
+    tailoring_genes: Dict[str, int] = field(default_factory=dict)
 
     @property
     def baseline(self) -> Optional[str]:
@@ -107,6 +108,8 @@ class _Domain:
     locus_tag: str
     start: int
     substrate: Optional[str] = None
+    sequence: Optional[str] = None
+    index_in_gene: Optional[int] = None
 
 
 def _collect_domains(record) -> List[_Domain]:
@@ -132,9 +135,19 @@ def _collect_domains(record) -> List[_Domain]:
                 locus_tag=feature.qualifiers.get("locus_tag", ["?"])[0],
                 start=int(feature.location.start),
                 substrate=_consensus_substrate(feature.qualifiers),
+                sequence=feature.qualifiers.get("translation", [None])[0],
             )
         )
     domains.sort(key=lambda d: d.start)
+    # Number the substrate-selecting domains within each gene, so a module can
+    # be matched to the same domain in another data source.
+    counters: Dict[str, int] = {}
+    for domain in domains:
+        if domain.role != "a":
+            continue
+        index = counters.get(domain.locus_tag, 0)
+        domain.index_in_gene = index
+        counters[domain.locus_tag] = index + 1
     return domains
 
 
@@ -169,6 +182,8 @@ class _ModuleBuilder:
                 self._start(NRPS, domain)
             self._has_core["a"] = True
             self._current.substrate = domain.substrate  # type: ignore[union-attr]
+            self._current.domain_index = domain.index_in_gene  # type: ignore[union-attr]
+            self._current.sequence = domain.sequence  # type: ignore[union-attr]
             return
         if role == "at":
             if self._current is None:
@@ -214,6 +229,10 @@ def parse_record(record, bgc_id: str) -> AntismashRecord:
         if feature.type == "region":
             products.extend(feature.qualifiers.get("product", []))
 
+    from .tailoring import detect as detect_tailoring
+
+    tailoring_genes = detect_tailoring(record).to_dict()
+
     builder = _ModuleBuilder()
     for domain in _collect_domains(record):
         builder.add(domain)
@@ -234,7 +253,13 @@ def parse_record(record, bgc_id: str) -> AntismashRecord:
         classes=sorted(set(products)),
         notes=notes,
     )
-    return AntismashRecord(bgc_id=bgc_id, spec=spec, baseline_smiles=baseline, products=products)
+    return AntismashRecord(
+        bgc_id=bgc_id,
+        spec=spec,
+        baseline_smiles=baseline,
+        products=products,
+        tailoring_genes=tailoring_genes,
+    )
 
 
 def load(path: Path) -> AntismashRecord:
