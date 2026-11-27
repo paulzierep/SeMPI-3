@@ -65,6 +65,43 @@ sempi3 benchmark --workers 8           # score every arm over MIBiG
 
 ## How it works
 
+```mermaid
+flowchart TD
+    MIBIG[("MIBiG 4.0<br/>3,013 curated clusters")]
+    AS[("antiSMASH 8 output<br/>published by MIBiG")]
+    PARAS[("PARAS<br/>2,873 curated A domains")]
+
+    AS --> PARSE["Read aSDomain features<br/>order by gene, then by position"]
+    PARSE --> MOD["Cut into modules<br/>a ketosynthase starts a PKS module<br/>an adenylation domain starts an NRPS module"]
+
+    MOD --> Q{"Did antiSMASH name<br/>the substrate?"}
+    Q -- "yes, 83%" --> SUB["Use its call"]
+    Q -- "no, 17%" --> POCKET["Binding-pocket model<br/>34 residues read against GrsA<br/>matched to curated domains"]
+    PARAS --> POCKET
+    MIBIG --> POCKET
+    POCKET --> SUB
+
+    SUB --> BUILD["Grow the chain in RDKit<br/>amide bonds, polyketide units,<br/>KR/DH/ER set the beta carbon,<br/>Cy domains close thiazolines"]
+    BUILD --> REL["Release the chain<br/>hydrolysis, reduction,<br/>macrolactam or macrolactone"]
+    REL --> TAIL["Decorate from the cluster's enzymes<br/>sugar, methyl, halogen"]
+    TAIL --> PRED(["Predicted structure"])
+
+    PRED --> SCORE["Score four ways:<br/>fingerprint similarity,<br/>common substructure loose and strict,<br/>containment"]
+    MIBIG --> TRUTH(["Known structure"])
+    TRUTH --> SCORE
+    ASBASE(["antiSMASH's own SMILES"]) --> SCORE
+    AS --> ASBASE
+
+    classDef data fill:#257de0,stroke:#1a5fa8,color:#ffffff
+    classDef step fill:#f6f8fa,stroke:#8b949e,color:#191919
+    classDef out fill:#00b894,stroke:#00866a,color:#ffffff
+    class MIBIG,AS,PARAS data
+    class PARSE,MOD,SUB,POCKET,BUILD,REL,TAIL,SCORE step
+    class PRED,TRUTH,ASBASE out
+```
+
+The numbered walk-through:
+
 1. **Parse** (`antismash_io.py`) — read `aSDomain` features from the antiSMASH
    GenBank, order them by gene and position in the protein, and cut them into
    modules: a new PKS module at every ketosynthase, a new NRPS module at every
