@@ -31,6 +31,62 @@ from . import (
 
 DEFAULT_OUTPUT = Path(__file__).parent / "data" / "substrate_signatures.tsv"
 
+
+def build_training_table(
+    json_dir: Path,
+    antismash_dir: Path,
+    out: Optional[Path] = None,
+) -> Path:
+    """Write the table the ranking models are fitted from.
+
+    One row per cluster: the features read off its gene cluster, and the
+    properties measured on its known product. Nothing is fitted here, so the
+    file stays readable and carries no dependency on a scikit-learn version.
+    """
+    from Bio import SeqIO
+
+    from . import (
+        antismash_io,
+        features,
+        mibig,
+        ranking,
+        structure_features as sf,
+    )
+
+    items = []
+    profiles = []
+    for json_path in sorted(Path(json_dir).glob("*.json")):
+        accession = json_path.stem
+        gbk = Path(antismash_dir) / f"{accession}.gbk"
+        if not gbk.exists():
+            continue
+        entry = mibig.load_entry(json_path)
+        if not entry.is_pks_nrps or not entry.structures:
+            continue
+        try:
+            parsed = antismash_io.load(gbk)
+            record = next(SeqIO.parse(str(gbk), "genbank"))
+        except Exception:  # noqa: BLE001
+            continue
+        if not parsed.spec.modules:
+            continue
+        profile = sf.describe(entry.structures[0])
+        if profile is None:
+            continue
+        record.products = parsed.products
+        items.append(features.build(record, parsed.spec, accession))
+        profiles.append(profile)
+
+    if not items:
+        raise RuntimeError("no clusters found to train on")
+
+    names = features.feature_names(items)
+    matrix = features.matrix(items, names, normalise=False)
+    targets = {name: [p.get(name) for p in profiles] for name in ranking.WEIGHTS}
+    path = ranking.write_training_table(names, matrix, targets, out)
+    print(f"{len(items)} clusters, {len(names)} features, {len(targets)} properties")
+    return path
+
 #: A signature with more gaps than this did not align well enough to trust.
 MAX_GAPS = 3
 
@@ -131,12 +187,30 @@ def build(
     table: Dict[str, Counter] = defaultdict(Counter)
 
     records = datasets.build_adomain_dataset(Path(json_dir), Path(antismash_dir))
+    usable = [
+        r
+        for r in records
+        if substrates.normalise(r.substrate) and r.sequence and len(r.sequence) >= 50
+    ]
+
+    # Signatures in the table have to be read the same way as the queries that
+    # will be matched against them, or the two will not line up.
+    from . import hmm_align
+
+    if hmm_align.available():
+        signatures = hmm_align.extract_signatures([r.sequence for r in usable])
+        signatures = [
+            s if s.count(st.GAP) <= MAX_GAPS else st.extract_signature(r.sequence)
+            for s, r in zip(signatures, usable)
+        ]
+        print(f"signatures read with the profile HMM ({len(usable)} domains)")
+    else:
+        signatures = [st.extract_signature(r.sequence) for r in usable]
+        print("hmmalign not found: signatures read by pairwise alignment")
+
     from_mibig = 0
-    for record in records:
+    for record, signature in zip(usable, signatures):
         label = substrates.normalise(record.substrate)
-        if not label or not record.sequence or len(record.sequence) < 50:
-            continue
-        signature = st.extract_signature(record.sequence)
         if signature.count(st.GAP) > MAX_GAPS:
             continue
         table[signature][label] += 1

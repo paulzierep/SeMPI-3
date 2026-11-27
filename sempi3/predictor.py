@@ -27,6 +27,9 @@ from typing import (
 from . import (
     antismash_io,
     assembly,
+    features,
+    hmm_align,
+    ranking,
     stachelhaus as st,
     tailoring,
 )
@@ -87,7 +90,9 @@ def predict_substrate(sequence: str) -> Tuple[Optional[str], float, str]:
     domain, so an exact pocket gives 1.0. The structure is returned alongside
     the name, since a name without one cannot be built into the chain.
     """
-    signature = st.extract_signature(sequence)
+    # A profile alignment reads the pocket more reliably on domains far from
+    # the reference; without HMMER this falls back to pairwise alignment.
+    signature, _method = hmm_align.signature(sequence)
     if signature.count(st.GAP) > 3:
         return None, 0.0, ""
     best_label: Optional[str] = None
@@ -117,6 +122,7 @@ class ClusterPrediction:
     tailoring_genes: Dict[str, int] = field(default_factory=dict)
     antismash_smiles: Optional[str] = None
     filled_substrates: int = 0
+    chosen_by: str = "rule"
     notes: List[str] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, object]:
@@ -130,6 +136,7 @@ class ClusterPrediction:
             "tailoring_genes": self.tailoring_genes,
             "antismash_smiles": self.antismash_smiles,
             "filled_substrates": self.filled_substrates,
+            "chosen_by": self.chosen_by,
             "notes": self.notes,
         }
 
@@ -138,15 +145,30 @@ def predict_all(
     gbk_path: Path,
     fill_substrates: bool = True,
     apply_tailoring: bool = True,
+    rank: bool = True,
 ) -> List[ClusterPrediction]:
     """Predict a product for every region in an antiSMASH GenBank file.
 
     A genome-wide antiSMASH run puts many regions in one file; each is an
     assembly line of its own and gets its own prediction.
     """
+    from Bio import SeqIO
+
+    records = antismash_io.load_regions(Path(gbk_path))
+    raw = None
+    if rank and records:
+        try:
+            raw = next(SeqIO.parse(str(gbk_path), "genbank"))
+        except Exception:  # noqa: BLE001
+            raw = None
     return [
-        _predict_record(record, fill_substrates=fill_substrates, apply_tailoring=apply_tailoring)
-        for record in antismash_io.load_regions(Path(gbk_path))
+        _predict_record(
+            record,
+            fill_substrates=fill_substrates,
+            apply_tailoring=apply_tailoring,
+            genbank_record=raw if rank else None,
+        )
+        for record in records
     ]
 
 
@@ -154,6 +176,7 @@ def predict(
     gbk_path: Path,
     fill_substrates: bool = True,
     apply_tailoring: bool = True,
+    rank: bool = True,
 ) -> ClusterPrediction:
     """Predict the product of a single-cluster antiSMASH file.
 
@@ -163,10 +186,28 @@ def predict(
         apply_tailoring: Decorate the backbone from the cluster's enzymes.
     """
     record = antismash_io.load(Path(gbk_path))
-    return _predict_record(record, fill_substrates=fill_substrates, apply_tailoring=apply_tailoring)
+    raw = None
+    if rank:
+        from Bio import SeqIO
+
+        try:
+            raw = next(SeqIO.parse(str(gbk_path), "genbank"))
+        except Exception:  # noqa: BLE001
+            raw = None
+    return _predict_record(
+        record,
+        fill_substrates=fill_substrates,
+        apply_tailoring=apply_tailoring,
+        genbank_record=raw,
+    )
 
 
-def _predict_record(record, fill_substrates: bool, apply_tailoring: bool) -> ClusterPrediction:
+def _predict_record(
+    record,
+    fill_substrates: bool,
+    apply_tailoring: bool,
+    genbank_record=None,
+) -> ClusterPrediction:
     spec = record.spec
 
     filled = 0
@@ -184,11 +225,34 @@ def _predict_record(record, fill_substrates: bool, apply_tailoring: bool) -> Clu
 
     prediction = assembly.assemble(spec, skip_unknown_substrates=True)
     smiles = prediction.smiles
-    if apply_tailoring and smiles and record.tailoring_genes:
-        genes = tailoring.TailoringGenes(counts=record.tailoring_genes)
-        decorated = tailoring.apply(smiles, genes, enabled=list(tailoring.DEFAULT_REACTIONS))
-        if decorated:
-            smiles = decorated
+    release = prediction.release
+    chosen_by = "rule"
+
+    # Candidates: every release the chain allows, bare and decorated.
+    candidates: Dict[str, str] = dict(prediction.variants)
+    genes = tailoring.TailoringGenes(counts=record.tailoring_genes)
+    if apply_tailoring and record.tailoring_genes:
+        for label, variant in list(prediction.variants.items()):
+            decorated = tailoring.apply(variant, genes, enabled=list(tailoring.DEFAULT_REACTIONS))
+            if decorated and decorated != variant:
+                candidates[f"{label}+tailored"] = decorated
+        if smiles:
+            decorated = tailoring.apply(smiles, genes, enabled=list(tailoring.DEFAULT_REACTIONS))
+            if decorated:
+                smiles = decorated
+                release = f"{release}+tailored" if release else release
+
+    # Ask the cluster what its product should look like, and keep the
+    # candidate that fits that description best.
+    if genbank_record is not None and len(candidates) > 1:
+        try:
+            genbank_record.products = record.products
+            chosen = ranking.choose(candidates, features.build(genbank_record, spec, record.bgc_id))
+        except Exception:  # noqa: BLE001 - ranking must never break a prediction
+            chosen = None
+        if chosen:
+            release, smiles, _score = chosen
+            chosen_by = "property model"
 
     modules = []
     for module in spec.modules:
@@ -208,12 +272,13 @@ def _predict_record(record, fill_substrates: bool, apply_tailoring: bool) -> Clu
     return ClusterPrediction(
         bgc_id=record.bgc_id,
         smiles=smiles,
-        release=prediction.release,
+        release=release,
         products=record.products,
         modules=modules,
-        variants=prediction.variants,
+        variants=candidates,
         tailoring_genes=record.tailoring_genes,
         antismash_smiles=record.baseline,
         filled_substrates=filled,
+        chosen_by=chosen_by,
         notes=prediction.notes,
     )

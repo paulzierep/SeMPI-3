@@ -62,6 +62,10 @@ DOMAIN_ROLES: Dict[str, str] = {
     "oMT": "omt",
     "Thioesterase": "te",
     "TD": "td",
+    # Domains that load a starter unit rather than extend the chain.
+    "CAL_domain": "cal",
+    "FkbH": "fkbh",
+    "GNAT": "gnat",
     "TIGR01720": "ignore",
 }
 
@@ -70,6 +74,7 @@ UNKNOWN_SUBSTRATES = {"x", "pk", "nrp", "?", ""}
 
 _CONSENSUS = re.compile(r"substrate consensus:\s*(.+)", re.IGNORECASE)
 _KR_ACTIVITY = re.compile(r"KR activity:\s*(\w+)", re.IGNORECASE)
+_MINOWA = re.compile(r"Minowa:\s*(.+)", re.IGNORECASE)
 _TRANSATOR = re.compile(r"transATor:\s*(.+)", re.IGNORECASE)
 
 #: transATor calls mapped onto the oxidation level of the beta carbon.
@@ -148,6 +153,16 @@ def _is_active(qualifiers: Dict[str, List[str]]) -> bool:
     return True
 
 
+def _minowa_call(qualifiers: Dict[str, List[str]]) -> Optional[str]:
+    """What a CoA ligase domain loads, as antiSMASH's Minowa method reports it."""
+    for entry in qualifiers.get("specificity", []):
+        match = _MINOWA.search(entry)
+        if match:
+            value = match.group(1).strip()
+            return value or None
+    return None
+
+
 def _transator_call(qualifiers: Dict[str, List[str]]) -> Optional[str]:
     for entry in qualifiers.get("specificity", []):
         match = _TRANSATOR.search(entry)
@@ -204,7 +219,10 @@ def _collect_domains(record, bounds: Optional[Tuple[int, int]] = None) -> List[_
                 name=name,
                 locus_tag=feature.qualifiers.get("locus_tag", ["?"])[0],
                 start=int(feature.location.start),
-                substrate=_consensus_substrate(feature.qualifiers),
+                substrate=(
+                    _consensus_substrate(feature.qualifiers)
+                    or (_minowa_call(feature.qualifiers) if name == "CAL_domain" else None)
+                ),
                 sequence=feature.qualifiers.get("translation", [None])[0],
                 active=_is_active(feature.qualifiers),
                 transator=_transator_call(feature.qualifiers),
@@ -263,6 +281,19 @@ class _ModuleBuilder:
                 self._current.non_elongating = call.startswith("non-elongating")  # type: ignore[union-attr]
                 self._current.alpha_methyl = "alphame" in call  # type: ignore[union-attr]
                 self._current.reduction_override = TRANSATOR_REDUCTION.get(call)  # type: ignore[union-attr]
+            return
+        if role in ("cal", "fkbh", "gnat"):
+            # A loading domain starts the line and installs a starter unit
+            # rather than extending anything.
+            self._start(PKS, domain)
+            self._current.is_starter = True  # type: ignore[union-attr]
+            self._current.domain_count = 1  # type: ignore[union-attr]
+            if role == "cal":
+                self._current.substrate = domain.substrate  # type: ignore[union-attr]
+            elif role == "fkbh":
+                self._current.substrate = "glycolyl"  # type: ignore[union-attr]
+            else:
+                self._current.substrate = "acetyl"  # type: ignore[union-attr]
             return
         if role == "cy":
             self._pending_heterocycle = True

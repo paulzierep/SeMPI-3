@@ -33,6 +33,16 @@ PKS_STARTERS: Dict[str, str] = {
     "propionyl": "CCC(=O)O",
     "benzoyl": "O=C(O)c1ccccc1",
     "isobutyryl": "CC(C)C(=O)O",
+    # Starters a CoA ligase (CAL) domain loads, named as antiSMASH reports
+    # them. A fatty acid starter has no fixed length; octanoate stands in for
+    # the common range.
+    "ahba": "Nc1cc(O)cc(c1)C(=O)O",  # 3-amino-5-hydroxybenzoic acid
+    "fatty_acid": "CCCCCCCC(=O)O",
+    "shikimic_acid": "O[C@@H]1C=C(C(=O)O)C[C@H](O)[C@H]1O",
+    "acetyl-coa": "CC(=O)O",
+    "nh2": "CC(=O)O",  # no usable call; the default starter stands
+    # Glycolate-derived starter installed by an FkbH domain.
+    "glycolyl": "OCC(=O)O",
 }
 
 #: Branch added to the alpha carbon by a PKS extender unit. ``None`` means the

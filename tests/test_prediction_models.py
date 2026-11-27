@@ -179,3 +179,51 @@ def test_detect_counts_enzyme_families():
     )
     counts = tailoring.detect(record).to_dict()
     assert counts == {"glycosyltransferase": 1, "halogenase": 1}
+
+
+def test_hmm_module_falls_back_without_hmmer(monkeypatch):
+    from sempi3 import hmm_align, stachelhaus as st
+
+    monkeypatch.setattr(hmm_align, "available", lambda: False)
+    signature, method = hmm_align.signature(st.reference_sequence())
+    assert method == "pairwise"
+    assert st.code_from_signature(signature) == st.REFERENCE_CODE
+
+
+def test_hmm_profile_is_packaged():
+    from sempi3 import hmm_align
+
+    assert hmm_align.HMM_FILE.exists()
+    assert "AMP-binding" in hmm_align.HMM_FILE.read_text()[:400]
+
+
+def test_match_states_skip_insertions():
+    from sempi3 import hmm_align
+
+    # Lowercase letters are insertions and occupy no match state.
+    states = hmm_align._match_states("AB-cdE")
+    assert states == {1: "A", 2: "B", 4: "E"}
+
+
+def test_ranking_table_is_packaged():
+    from sempi3 import ranking
+
+    data = ranking.load_training_table()
+    assert data is not None
+    assert data.rows > 500
+    assert set(ranking.WEIGHTS) <= set(data.targets)
+
+
+def test_ranking_prefers_the_candidate_that_fits():
+    from sempi3 import ranking
+
+    wanted = {"n_heavy_atoms": 6.0, "n_nitrogen": 0.0, "n_amide": 0.0}
+    close = ranking.distance("CCCCCC", wanted)
+    far = ranking.distance("CCCCCCCCCCCCCCCCCCCC", wanted)
+    assert close < far
+
+
+def test_ranking_rejects_unparseable_candidates():
+    from sempi3 import ranking
+
+    assert ranking.distance("not-a-smiles", {"n_heavy_atoms": 6.0}) == float("inf")

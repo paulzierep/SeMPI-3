@@ -7,29 +7,29 @@
       "tanimoto_median": 0.1111,
       "tanimoto_ge_0.4": 56,
       "tanimoto_ge_0.6": 14,
-      "coverage_pred_mean": 0.4251,
-      "strict_coverage_pred_mean": 0.3892,
+      "coverage_pred_mean": 0.4248,
+      "strict_coverage_pred_mean": 0.3887,
       "substructure_match_rate": 0.0246
     },
     "sempi3_antismash": {
-      "predicted": 1400,
-      "tanimoto_mean": 0.2037,
-      "tanimoto_median": 0.1538,
-      "tanimoto_ge_0.4": 156,
-      "tanimoto_ge_0.6": 44,
-      "coverage_pred_mean": 0.5313,
-      "strict_coverage_pred_mean": 0.4538,
-      "substructure_match_rate": 0.0221
+      "predicted": 1406,
+      "tanimoto_mean": 0.2042,
+      "tanimoto_median": 0.1541,
+      "tanimoto_ge_0.4": 159,
+      "tanimoto_ge_0.6": 42,
+      "coverage_pred_mean": 0.5319,
+      "strict_coverage_pred_mean": 0.4537,
+      "substructure_match_rate": 0.0235
     },
     "sempi3_antismash_oracle": {
-      "predicted": 1400,
-      "tanimoto_mean": 0.2435,
+      "predicted": 1406,
+      "tanimoto_mean": 0.2431,
       "tanimoto_median": 0.1795,
-      "tanimoto_ge_0.4": 239,
-      "tanimoto_ge_0.6": 83,
-      "coverage_pred_mean": 0.6025,
-      "strict_coverage_pred_mean": 0.5246,
-      "substructure_match_rate": 0.0364
+      "tanimoto_ge_0.4": 241,
+      "tanimoto_ge_0.6": 82,
+      "coverage_pred_mean": 0.6001,
+      "strict_coverage_pred_mean": 0.5219,
+      "substructure_match_rate": 0.037
     },
     "sempi3_mibig": {
       "predicted": 578,
@@ -37,23 +37,23 @@
       "tanimoto_median": 0.1967,
       "tanimoto_ge_0.4": 131,
       "tanimoto_ge_0.6": 43,
-      "coverage_pred_mean": 0.5844,
-      "strict_coverage_pred_mean": 0.5332,
+      "coverage_pred_mean": 0.584,
+      "strict_coverage_pred_mean": 0.5325,
       "substructure_match_rate": 0.0294
     }
   },
   "head_to_head_sempi3_antismash": {
-    "compared": 1212,
-    "wins": 877,
-    "ties": 7,
-    "losses": 328,
-    "mean_delta": 0.0721
+    "compared": 1216,
+    "wins": 881,
+    "ties": 8,
+    "losses": 327,
+    "mean_delta": 0.0731
   },
   "head_to_head_sempi3_antismash_oracle": {
-    "compared": 1212,
-    "wins": 1048,
-    "ties": 26,
-    "losses": 138,
+    "compared": 1216,
+    "wins": 1056,
+    "ties": 31,
+    "losses": 129,
     "mean_delta": 0.1162
   },
   "head_to_head_sempi3_mibig": {
@@ -68,21 +68,21 @@
       "clusters": 469,
       "antismash": 0.2193,
       "sempi3_antismash": 0.3013,
-      "sempi3_antismash_oracle": 0.3867,
+      "sempi3_antismash_oracle": 0.3851,
       "sempi3_mibig": 0.3394
     },
     "PKS_only": {
       "clusters": 677,
       "antismash": 0.0909,
-      "sempi3_antismash": 0.1372,
-      "sempi3_antismash_oracle": 0.1486,
+      "sempi3_antismash": 0.1387,
+      "sempi3_antismash_oracle": 0.15,
       "sempi3_mibig": 0.1386
     },
     "hybrid": {
       "clusters": 375,
       "antismash": 0.1356,
-      "sempi3_antismash": 0.2172,
-      "sempi3_antismash_oracle": 0.2554,
+      "sempi3_antismash": 0.2171,
+      "sempi3_antismash_oracle": 0.2525,
       "sempi3_mibig": 0.2333
     }
   }

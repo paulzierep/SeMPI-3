@@ -30,10 +30,17 @@ import numpy as np
 from sempi3 import (
     antismash_io,
     datasets,
+    hmm_align,
     mibig,
     stachelhaus as st,
     substrates,
 )
+
+
+def _signature(sequence: str) -> str:
+    """Pocket signature, by profile alignment when HMMER is available."""
+    found, _method = hmm_align.signature(sequence)
+    return found
 
 ANTISMASH_DIR = Path("data/raw/antismash/mibig_antismash_4.0_gbk_as8b1")
 JSON_DIR = Path("data/raw/json/mibig_json_4.0")
@@ -51,7 +58,7 @@ def _load_labelled() -> List[dict]:
             continue
         rows.append(
             {
-                "signature": st.extract_signature(sequence),
+                "signature": _signature(sequence),
                 "label": label,
                 "bgc_id": raw["bgc_id"],
                 "genes": {raw["gene"]},
@@ -149,7 +156,7 @@ def main() -> int:
 
         for accession, gene, index, sequence in pending:
             gaps += 1
-            signature = st.extract_signature(sequence)
+            signature = _signature(sequence)
             if signature.count(st.GAP) > 3:
                 continue
             prediction = _predict(table, signature)

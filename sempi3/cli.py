@@ -190,6 +190,33 @@ def build_reference(json_dir: Path, antismash_dir: Path, paras: Path, out: Path)
     click.echo(f"wrote {path}")
 
 
+@cli.command("train")
+@click.option(
+    "--json-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=DEFAULT_JSON_DIR,
+    show_default=True,
+)
+@click.option(
+    "--antismash-dir",
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=DEFAULT_ANTISMASH_DIR,
+    show_default=True,
+)
+@click.option("--out", type=click.Path(path_type=Path), default=None)
+def train(json_dir: Path, antismash_dir: Path, out: Path) -> None:
+    """Rebuild the table the ranking models are fitted from.
+
+    Run this after a new MIBiG release, alongside `build-reference`. The
+    models themselves are fitted on first use and never stored, so no model
+    file is pinned to one scikit-learn version.
+    """
+    from . import reference
+
+    path = reference.build_training_table(json_dir, antismash_dir, out)
+    click.echo(f"wrote {path}")
+
+
 @cli.command("spec")
 @click.argument("bgc_id")
 @click.option(
