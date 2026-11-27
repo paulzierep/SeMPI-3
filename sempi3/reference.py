@@ -35,10 +35,60 @@ DEFAULT_OUTPUT = Path(__file__).parent / "data" / "substrate_signatures.tsv"
 MAX_GAPS = 3
 
 
+def _read_fasta(path: Path) -> Dict[str, str]:
+    entries: Dict[str, str] = {}
+    name: Optional[str] = None
+    parts: list = []
+    for line in Path(path).read_text().splitlines():
+        if line.startswith(">"):
+            if name:
+                entries[name] = "".join(parts)
+            name, parts = line[1:].strip(), []
+        else:
+            parts.append(line.strip())
+    if name:
+        entries[name] = "".join(parts)
+    return entries
+
+
+def read_paras(directory: Path) -> Dict[str, str]:
+    """Signatures and substrates from a PARAS database directory.
+
+    Accepts either the two database files (3,653 domains) or the condensed
+    table (2,873), whichever is present.
+    """
+    directory = Path(directory)
+    signatures_path = directory / "extended_signatures.fasta"
+    mapping_path = directory / "domain_substrate_mapping.txt"
+    rows: Dict[str, str] = {}
+
+    if signatures_path.exists() and mapping_path.exists():
+        signatures = _read_fasta(signatures_path)
+        with open(mapping_path) as handle:
+            reader = csv.DictReader(handle, delimiter="\t")
+            for row in reader:
+                identifier = row.get("domain_id", "")
+                signature = signatures.get(identifier, "")
+                label = substrates.normalise(row.get("specificity"))
+                if label and len(signature) == len(st.EXTENDED_POSITIONS):
+                    rows[identifier] = f"{signature}\t{label}"
+        return rows
+
+    condensed = directory / "dataset_paras.tsv"
+    if condensed.exists():
+        with open(condensed) as handle:
+            for row in csv.DictReader(handle, delimiter="\t"):
+                signature = row.get("extended_signature", "").strip().upper()
+                label = substrates.normalise(row.get("substrate_specificity"))
+                if label and len(signature) == len(st.EXTENDED_POSITIONS):
+                    rows[row.get("domain_id", signature)] = f"{signature}\t{label}"
+    return rows
+
+
 def build(
     json_dir: Path,
     antismash_dir: Path,
-    paras_tsv: Optional[Path] = None,
+    paras_dir: Optional[Path] = None,
     out: Optional[Path] = None,
 ) -> Path:
     """Write a fresh signature table from the data on disk.
@@ -47,7 +97,7 @@ def build(
         json_dir: MIBiG entries, any release.
         antismash_dir: antiSMASH output for those entries, which supplies the
             domain sequences MIBiG itself does not carry.
-        paras_tsv: Optional extra collection in the PARAS format, which gives
+        paras_dir: Optional directory holding a PARAS release, which gives
             signatures directly.
         out: Where to write; the packaged table by default.
 
@@ -70,15 +120,11 @@ def build(
         from_mibig += 1
 
     from_extra = 0
-    if paras_tsv and Path(paras_tsv).exists():
-        with open(paras_tsv) as handle:
-            for row in csv.DictReader(handle, delimiter="\t"):
-                signature = row.get("extended_signature", "").strip().upper()
-                label = substrates.normalise(row.get("substrate_specificity"))
-                if not label or len(signature) != len(st.EXTENDED_POSITIONS):
-                    continue
-                table[signature][label] += 1
-                from_extra += 1
+    if paras_dir and Path(paras_dir).exists():
+        for entry in read_paras(paras_dir).values():
+            signature, label = entry.split("\t")
+            table[signature][label] += 1
+            from_extra += 1
 
     out.parent.mkdir(parents=True, exist_ok=True)
     with open(out, "w") as handle:

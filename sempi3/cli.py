@@ -172,10 +172,10 @@ def _render(result) -> str:
 )
 @click.option(
     "--paras",
-    type=click.Path(exists=True, dir_okay=False, path_type=Path),
-    default=Path("data/external/paras/dataset_paras.tsv"),
+    type=click.Path(exists=True, file_okay=False, path_type=Path),
+    default=Path("data/external/paras"),
     show_default=True,
-    help="Optional extra set of curated domains.",
+    help="Directory holding a PARAS release.",
 )
 @click.option("--out", type=click.Path(path_type=Path), default=None, help="Where to write the table.")
 def build_reference(json_dir: Path, antismash_dir: Path, paras: Path, out: Path) -> None:

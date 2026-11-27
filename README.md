@@ -40,7 +40,7 @@ publishes that output for every entry, so nothing has to be installed or run.
 |---|---|---|
 | `mibig_json_4.0.tar.gz` | 30 MB | curated clusters: compounds with SMILES, curated modules |
 | `mibig_antismash_4.0_gbk_as8b1.tar.bz2` | 64 MB | antiSMASH 8 output per entry: domains, substrates, baseline SMILES |
-| `dataset_paras.tsv` | 175 kB | 2,873 curated A-domain substrates with binding-pocket signatures ([PARAS](https://github.com/BTheDragonMaster/parasect), CC BY 4.0) |
+| PARAS database files | 300 kB | 3,653 curated A-domain substrates with binding-pocket signatures ([PARAS](https://github.com/BTheDragonMaster/parasect), CC BY 4.0) |
 
 Optional, and fetched by hand because the publisher blocks automated requests:
 `A_domains.csv` from the [SeMPI 2.0 supplement](https://www.mdpi.com/2218-1989/11/1/13/s1)
@@ -106,8 +106,14 @@ pytest -q && sempi3 benchmark           # check nothing regressed
 ```
 
 `build-reference` takes `--json-dir`, `--antismash-dir` and `--paras`, so any
-collection of curated domains can be folded in. Today's table holds 3,434
-signatures from 2,575 MIBiG domains and 2,873 PARAS rows.
+collection of curated domains can be folded in. Today's table holds 3,980
+signatures from 2,575 MIBiG domains and 3,653 PARAS rows.
+
+A note on where the pocket positions came from: they were recovered from the
+PARAS data by alignment rather than copied from a paper, and PARAS later
+turned out to publish its own per-domain positions. Ours reproduce their
+signatures residue for residue 91.5% of the time, against 80.1% for the
+obvious alternative numbering, so the recovery was sound.
 
 **Working against MIBiG**, for development and benchmarking:
 

@@ -23,11 +23,15 @@ echo "==> MIBiG 4.0 antiSMASH 8 output"
 mkdir -p antismash && tar xjf mibig_antismash_4.0.tar.bz2 -C antismash
 
 echo "==> PARAS A-domain training set"
-# 2,873 adenylation domains with curated substrates and 34-residue binding
-# pocket signatures, from Terlouw et al. (PARAS/PARASECT). CC BY 4.0.
+# 3,653 adenylation domains with curated substrates and their 34-residue
+# binding pocket signatures, from Terlouw et al. (PARAS/PARASECT). CC BY 4.0.
+# The two database files hold 780 more domains than the condensed table.
+PARAS_RAW="https://raw.githubusercontent.com/BTheDragonMaster/parasect/main"
 mkdir -p ../external/paras
-[ -f ../external/paras/dataset_paras.tsv ] || curl -fL -o ../external/paras/dataset_paras.tsv \
-    "https://raw.githubusercontent.com/BTheDragonMaster/parasect/main/condensed/data/dataset_paras.tsv"
+[ -f ../external/paras/extended_signatures.fasta ] || curl -fL -o ../external/paras/extended_signatures.fasta \
+    "$PARAS_RAW/src/parasect/data/database_files/extended_signatures.fasta"
+[ -f ../external/paras/domain_substrate_mapping.txt ] || curl -fL -o ../external/paras/domain_substrate_mapping.txt \
+    "$PARAS_RAW/src/parasect/data/database_files/domain_substrate_mapping.txt"
 
 echo "==> done"
 du -sh json antismash ../external
