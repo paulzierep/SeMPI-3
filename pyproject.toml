@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sempi3"
+version = "0.1.0"
+description = "Structure prediction for modular PKS/NRPS gene clusters from antiSMASH output"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Paul Zierep" }]
+keywords = ["bioinformatics", "natural products", "PKS", "NRPS", "antiSMASH", "MIBiG", "RDKit"]
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "biopython>=1.81",
+    "click>=8.1",
+    "numpy>=1.24",
+    "pandas>=2.0",
+    "rdkit>=2023.3",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.4", "ruff>=0.4", "black>=24.0"]
+ml = ["scikit-learn>=1.3"]
+
+[project.scripts]
+sempi3 = "sempi3.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/paulzierep/SeMPI-3"
+Issues = "https://github.com/paulzierep/SeMPI-3/issues"
+
+[tool.setuptools.packages.find]
+include = ["sempi3*"]
+
+[tool.black]
+line-length = 120
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["B008"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
