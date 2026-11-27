@@ -11,6 +11,7 @@ from . import (
     assembly,
     evaluate,
     mibig,
+    predictor,
 )
 from .spec import ClusterSpec
 
@@ -61,6 +62,57 @@ def predict(bgc_id: str, json_dir: Path, show_variants: bool) -> None:
         click.echo(f"known ({name}): {structure}")
     for note in prediction.notes:
         click.echo(f"note: {note}")
+
+
+@cli.command("run")
+@click.argument("gbk", type=click.Path(exists=True, dir_okay=False, path_type=Path))
+@click.option("--format", "output_format", type=click.Choice(["text", "json", "smiles"]), default="text")
+@click.option("--no-fill", is_flag=True, help="Do not name the substrates antiSMASH left unnamed.")
+@click.option("--no-tailoring", is_flag=True, help="Report the bare backbone.")
+@click.option("--out", type=click.Path(path_type=Path), default=None, help="Write to a file.")
+def run_on_file(gbk: Path, output_format: str, no_fill: bool, no_tailoring: bool, out: Path) -> None:
+    """Predict the product of an antiSMASH-annotated cluster.
+
+    This is the way to use SeMPI-3 downstream of antiSMASH: point it at a
+    GenBank file antiSMASH wrote, for any genome.
+    """
+    result = predictor.predict(gbk, fill_substrates=not no_fill, apply_tailoring=not no_tailoring)
+
+    if output_format == "json":
+        text = json.dumps(result.to_dict(), indent=2)
+    elif output_format == "smiles":
+        text = f"{result.smiles}\t{result.bgc_id}"
+    else:
+        lines = [
+            f"{result.bgc_id}  products={'|'.join(result.products) or '-'}  modules={len(result.modules)}",
+        ]
+        for module in result.modules:
+            substrate = str(module["substrate"] or "-")[:34]
+            extra = module["reduction_state"] or ""
+            marks = "".join(
+                ["E" if module["epimerization"] else "", "Cy" if module["heterocyclization"] else ""]
+            )
+            confidence = f" ({module['confidence']})" if module["confidence"] else ""
+            lines.append(
+                f"  {module['order']:>2} {module['kind']:<4} {substrate:<34}{confidence:<8} {extra} {marks}"
+            )
+        if result.filled_substrates:
+            lines.append(f"substrates named by the pocket model: {result.filled_substrates}")
+        if result.tailoring_genes:
+            lines.append(f"tailoring enzymes: {result.tailoring_genes}")
+        lines.append(f"release: {result.release}")
+        lines.append(f"SeMPI-3:   {result.smiles}")
+        if result.antismash_smiles:
+            lines.append(f"antiSMASH: {result.antismash_smiles}")
+        for note in result.notes[:4]:
+            lines.append(f"note: {note}")
+        text = "\n".join(lines)
+
+    if out:
+        out.write_text(text + "\n")
+        click.echo(f"wrote {out}")
+    else:
+        click.echo(text)
 
 
 @cli.command("spec")

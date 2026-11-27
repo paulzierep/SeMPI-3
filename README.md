@@ -11,8 +11,13 @@ own structure prediction as the baseline to beat.
 Scope: modular type-I **PKS**, **NRPS** and PKS/NRPS hybrids — the systems whose
 product can be read off the domain order.
 
-> Status: early. The rule-based engine and the benchmark work end to end; the
-> machine-learning stage is not built yet. See [Roadmap](#roadmap).
+On the MIBiG benchmark, given the same antiSMASH input, SeMPI-3's structures
+are closer to the real product than antiSMASH's own prediction on 864 of
+1,161 clusters.
+
+> Status: early but usable. `sempi3 run` works on any antiSMASH GenBank file.
+> The chemistry and the benchmark are solid; the substrate model is a
+> nearest-pocket matcher rather than something learned. See [Roadmap](#roadmap).
 
 ## Install
 
@@ -56,8 +61,34 @@ an antiSMASH annotation. That is the benchmark set.
 
 ## Use
 
+**Downstream of antiSMASH, on any genome.** Run antiSMASH, then point SeMPI-3
+at the GenBank file it wrote:
+
 ```bash
-sempi3 predict BGC0000290              # predict one cluster, show its modules
+sempi3 run region001.gbk                  # structure, modules, antiSMASH's own call
+sempi3 run region001.gbk --format smiles  # just the SMILES, for a pipeline
+sempi3 run region001.gbk --format json --out prediction.json
+sempi3 run region001.gbk --no-tailoring   # the bare backbone
+```
+
+```text
+BGC0000290  products=NRPS|T3PKS  modules=7
+   0 nrps Dhpg
+   1 nrps Tyr                       E
+   ...
+tailoring enzymes: {'halogenase': 2, 'hydroxylase': 4}
+release: macrolactam
+SeMPI-3:   O=C1N[C@@H](c2ccc(O)cc2Cl)C(=O)N[C@@H](c2cc(O)cc(O)c2)...
+antiSMASH: NC(c1ccc(O)cc1)C(=O)NC(Cc1ccc(O)cc1)C(=O)NC(c1cc(O)cc(O)c1)...
+```
+
+No extra files are needed: the binding-pocket reference that names the
+substrates antiSMASH leaves unnamed ships inside the package (162 kB).
+
+**Working against MIBiG**, for development and benchmarking:
+
+```bash
+sempi3 predict BGC0000290              # predict one MIBiG cluster
 sempi3 predict BGC0000290 --show-variants
 sempi3 spec BGC0000001                 # the parsed assembly line, as JSON
 sempi3 benchmark --workers 8           # score every arm over MIBiG

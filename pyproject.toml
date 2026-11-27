@@ -39,6 +39,9 @@ Issues = "https://github.com/paulzierep/SeMPI-3/issues"
 [tool.setuptools.packages.find]
 include = ["sempi3*"]
 
+[tool.setuptools.package-data]
+sempi3 = ["data/*.txt", "data/*.tsv"]
+
 [tool.black]
 line-length = 120
 
