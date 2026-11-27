@@ -11,19 +11,19 @@
     },
     "sempi3_antismash": {
       "predicted": 1341,
-      "tanimoto_mean": 0.1917,
-      "tanimoto_median": 0.1458,
-      "tanimoto_ge_0.4": 128,
-      "tanimoto_ge_0.6": 39,
-      "coverage_pred_mean": 0.5018
+      "tanimoto_mean": 0.1947,
+      "tanimoto_median": 0.1505,
+      "tanimoto_ge_0.4": 127,
+      "tanimoto_ge_0.6": 40,
+      "coverage_pred_mean": 0.5002
     },
     "sempi3_antismash_oracle": {
       "predicted": 1341,
-      "tanimoto_mean": 0.2267,
-      "tanimoto_median": 0.1628,
+      "tanimoto_mean": 0.2303,
+      "tanimoto_median": 0.1667,
       "tanimoto_ge_0.4": 211,
-      "tanimoto_ge_0.6": 74,
-      "coverage_pred_mean": 0.5622
+      "tanimoto_ge_0.6": 76,
+      "coverage_pred_mean": 0.5632
     },
     "sempi3_mibig": {
       "predicted": 528,
@@ -36,17 +36,17 @@
   },
   "head_to_head_sempi3_antismash": {
     "compared": 1161,
-    "wins": 859,
-    "ties": 8,
-    "losses": 294,
-    "mean_delta": 0.0581
+    "wins": 864,
+    "ties": 7,
+    "losses": 290,
+    "mean_delta": 0.0616
   },
   "head_to_head_sempi3_antismash_oracle": {
     "compared": 1161,
-    "wins": 1000,
-    "ties": 27,
-    "losses": 134,
-    "mean_delta": 0.097
+    "wins": 1006,
+    "ties": 25,
+    "losses": 130,
+    "mean_delta": 0.1012
   },
   "head_to_head_sempi3_mibig": {
     "compared": 490,
@@ -59,22 +59,22 @@
     "NRPS_only": {
       "clusters": 469,
       "antismash": 0.2193,
-      "sempi3_antismash": 0.2986,
-      "sempi3_antismash_oracle": 0.3795,
+      "sempi3_antismash": 0.3016,
+      "sempi3_antismash_oracle": 0.3835,
       "sempi3_mibig": 0.3724
     },
     "PKS_only": {
       "clusters": 677,
       "antismash": 0.0909,
-      "sempi3_antismash": 0.1255,
-      "sempi3_antismash_oracle": 0.1339,
+      "sempi3_antismash": 0.1281,
+      "sempi3_antismash_oracle": 0.1363,
       "sempi3_mibig": 0.1324
     },
     "hybrid": {
       "clusters": 375,
       "antismash": 0.1356,
-      "sempi3_antismash": 0.2008,
-      "sempi3_antismash_oracle": 0.2354,
+      "sempi3_antismash": 0.2035,
+      "sempi3_antismash_oracle": 0.2397,
       "sempi3_mibig": 0.2311
     }
   }

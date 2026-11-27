@@ -173,6 +173,14 @@ def hydroxylate(smiles: str) -> Optional[str]:
     return _finish(editable)
 
 
+#: Reactions applied by default.
+#:
+#: Each was benchmarked on its own (``scripts/experiment_tailoring.py`` in the
+#: commit history): glycosylation +0.0015 mean Tanimoto, O-methylation +0.0005,
+#: halogenation +0.0001, and hydroxylation **-0.0035**. Hydroxylation is left
+#: out for that reason: an added hydroxyl lands on the wrong carbon too often.
+DEFAULT_REACTIONS = ("glycosyltransferase", "o_methyltransferase", "halogenase")
+
 #: Reaction name -> the function that applies it once.
 REACTIONS = {
     "glycosyltransferase": glycosylate,

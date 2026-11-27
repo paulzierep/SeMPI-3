@@ -33,6 +33,7 @@ from .chem import (
     Chain,
     ChemError,
     append_amino_acid,
+    append_heterocycle,
     append_pks_unit,
     start_chain,
     terminate,
@@ -237,6 +238,13 @@ def _apply_module(
             if module.n_methylation:
                 notes.append(f"module {module.order}: N-methylation on the starter is not modelled")
             return start_chain(substrate), True
+        if module.heterocyclization:
+            # A Cy domain only closes a ring when the residue has a thiol or
+            # hydroxyl side chain; otherwise it just condenses.
+            try:
+                return append_heterocycle(chain, substrate), True
+            except ChemError as exc:
+                notes.append(f"module {module.order}: no heterocycle ({exc})")
         return append_amino_acid(chain, substrate, n_methylation=module.n_methylation), True
 
     # PKS module.

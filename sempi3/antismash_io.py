@@ -50,7 +50,7 @@ DOMAIN_ROLES: Dict[str, str] = {
     "PP-binding": "carrier",
     "PCP": "carrier",
     "Condensation": "c",
-    "Heterocyclization": "c",
+    "Heterocyclization": "cy",
     "AMP-binding": "a",
     "A-OX": "a",
     "Epimerization": "e",
@@ -159,6 +159,8 @@ class _ModuleBuilder:
         self._current: Optional[Module] = None
         self._has_core: Dict[str, bool] = {}
         self.release: Optional[str] = None
+        # A Cy domain sits before the A domain of the module it acts on.
+        self._pending_heterocycle = False
 
     def _flush(self) -> None:
         if self._current is not None:
@@ -177,9 +179,15 @@ class _ModuleBuilder:
             self._start(PKS, domain)
             self._has_core["ks"] = True
             return
+        if role == "cy":
+            self._pending_heterocycle = True
+            return
         if role == "a":
             if self._current is None or self._current.kind == PKS or self._has_core.get("a"):
                 self._start(NRPS, domain)
+            if self._pending_heterocycle:
+                self._current.heterocyclization = True  # type: ignore[union-attr]
+                self._pending_heterocycle = False
             self._has_core["a"] = True
             self._current.substrate = domain.substrate  # type: ignore[union-attr]
             self._current.domain_index = domain.index_in_gene  # type: ignore[union-attr]

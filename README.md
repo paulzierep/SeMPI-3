@@ -57,11 +57,15 @@ sempi3 benchmark --workers 8           # score every arm over MIBiG
    adenylation domain. Substrates come from the `substrate consensus` qualifier.
 2. **Assemble** (`assembly.py`, `chem.py`) — grow the chain as a real molecule:
    - NRPS modules form an amide bond with their amino acid;
+   - heterocyclisation (Cy) domains close the residue into a thiazoline
+     (cysteine) or oxazoline (serine, threonine) ring;
    - PKS modules add a two-carbon unit, and the module's KR/DH/ER domains set
      the oxidation level of the beta carbon (keto → hydroxyl → ene → alkyl);
    - epimerase domains invert the alpha carbon, methyltransferases add a methyl;
    - the chain is released by hydrolysis, reduction, macrolactamisation or
      macrolactonisation.
+   Tailoring enzymes found in the cluster then decorate the backbone
+   (`tailoring.py`): a sugar, a halogen or a methyl group, one each at most.
 3. **Fill the gaps** (`stachelhaus.py`, `substrates.py`) — antiSMASH reports
    no substrate for about one adenylation domain in six. Those domains are
    given one by reading their binding-pocket residues and matching them
@@ -121,38 +125,87 @@ Benchmark set: **1628 clusters** (MIBiG 4.0 PKS/NRPS entries with a known struct
 | Arm | Predicted | Tanimoto mean | Tanimoto median | ≥0.4 | ≥0.6 | Coverage of prediction |
 |---|---|---|---|---|---|---|
 | antiSMASH (baseline) | 1218 | 0.146 | 0.111 | 56 | 14 | 0.425 |
-| SeMPI-3 from antiSMASH | 1341 | 0.192 | 0.146 | 128 | 39 | 0.502 |
+| SeMPI-3 from antiSMASH | 1341 | 0.195 | 0.150 | 127 | 40 | 0.500 |
 | SeMPI-3 from MIBiG modules | 528 | 0.276 | 0.205 | 122 | 41 | 0.579 |
 
 **Head to head against antiSMASH**, on clusters where both made a prediction:
 
 | Arm | Compared | Wins | Ties | Losses | Mean Tanimoto difference |
 |---|---|---|---|---|---|
-| SeMPI-3 from antiSMASH | 1161 | 859 | 8 | 294 | +0.058 |
+| SeMPI-3 from antiSMASH | 1161 | 864 | 7 | 290 | +0.062 |
 | SeMPI-3 from MIBiG modules | 490 | 360 | 5 | 125 | +0.098 |
 
 **Mean Tanimoto by cluster class:**
 
 | Class | Clusters | antiSMASH | SeMPI-3 (antiSMASH input) | SeMPI-3 (MIBiG modules) |
 |---|---|---|---|---|
-| NRPS_only | 469 | 0.219 | 0.299 | 0.372 |
-| PKS_only | 677 | 0.091 | 0.126 | 0.132 |
-| hybrid | 375 | 0.136 | 0.201 | 0.231 |
+| NRPS_only | 469 | 0.219 | 0.302 | 0.372 |
+| PKS_only | 677 | 0.091 | 0.128 | 0.132 |
+| hybrid | 375 | 0.136 | 0.203 | 0.231 |
 
 Tanimoto is low for every arm in absolute terms, which is expected: all three predict a *backbone*, while the reference is the finished, tailored natural product. The comparison between arms is the meaningful part.
 <!-- RESULTS:END -->
 
+## What was tried, and what it was worth
+
+Every change was measured on the full benchmark before being kept. Mean
+Tanimoto of the committed prediction, in the order the work happened:
+
+| Step | Mean | Kept |
+|---|---|---|
+| Backbone from antiSMASH domains | 0.187 | — |
+| \+ substrate prediction for unassigned A domains | 0.192 | yes |
+| \+ heterocyclisation from Cy domains | 0.192 | yes |
+| \+ tailoring (sugar, methyl, halogen) | **0.195** | yes |
+| Release mechanism from a structure-trained model | 0.186 | **no** |
+| Release mechanism from a best-variant model | 0.189 | **no** |
+| \+ hydroxylation from P450 genes | 0.188 | **no** |
+
+Two results are worth stating plainly because they are negative:
+
+- **A better release model made the structures worse.** A random forest picks
+  the real release mechanism far better than the domain rule (0.753 against
+  0.284 accuracy), yet the predictions got worse. Closing a macrocycle raises
+  fingerprint similarity even when the real product has no macrocycle, so the
+  cruder rule suits the metric better. The rule is still in place, and both
+  models are kept in `scripts/` rather than deleted.
+- **Tailoring barely helps, and hydroxylation hurts.** The annotation says
+  *which* enzyme a cluster encodes but never *where* it acts, so the site has
+  to be guessed. Guessing costs more than it gains for hydroxyls.
+
+### Substrate prediction
+
+antiSMASH leaves about one adenylation domain in six without a call. Those
+domains get one from their binding-pocket residues, matched against curated
+domains from MIBiG and [PARAS](https://github.com/BTheDragonMaster/parasect).
+Over 2,680 labelled domains, in folds grouped by cluster:
+
+| Predictor | Accuracy |
+|---|---|
+| antiSMASH alone | 0.665 (no call for 415 domains) |
+| Stachelhaus 9-residue code, MIBiG only | 0.590 |
+| 34-residue signature, MIBiG only | 0.555 |
+| 34-residue signature, MIBiG + PARAS | 0.606 |
+| Random forest, MIBiG + PARAS | 0.638 |
+| **antiSMASH, with the pocket model filling its gaps** | **0.715** |
+
+The model does not beat antiSMASH on its own; it is worth having because it
+answers where antiSMASH does not. Adding the PARAS data helped every variant
+it was given to.
+
+The binding-pocket positions were not copied from a paper: they were recovered
+from the PARAS dataset by alignment, and the reference sequence shipped in
+`sempi3/data/` reproduces the published `DAWTIAAIC` code for phenylalanine,
+which is what pins the numbering.
+
 ## Roadmap
 
-1. **Rule-based backbone** — done, benchmarked above.
-2. **Better chemistry** — cyclisation beyond head-to-tail, heterocyclisation
-   (thiazoline/oxazoline from Cy domains), trans-AT handling, KR stereochemistry.
-3. **Machine learning where the rules run out**:
-   - substrate prediction from the A-domain sequence, trained on MIBiG's
-     ~3,200 labelled adenylation domains, to replace antiSMASH's call;
-   - PKS extender-unit prediction from the AT sequence;
-   - a model for post-assembly tailoring, which is where most of the remaining
-     difference to the true structure sits.
+1. **Rule-based backbone with pocket-model substrates** — done, benchmarked above.
+2. **PKS is the weak class** (0.128 against antiSMASH's 0.091, while NRPS is
+   0.302 against 0.219): trans-AT handling, beta-branching, starter units
+   beyond acetyl, and KR stereochemistry.
+3. **Where tailoring acts**, rather than only which enzymes are present. This
+   is where most of the remaining difference to the true structure sits.
 4. **Retrieval baseline** — transfer the structure of the most similar known
    cluster, as a sanity check that any learned model beats simple lookup.
 

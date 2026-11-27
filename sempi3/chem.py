@@ -186,6 +186,80 @@ def _finalise(rw: Chem.RWMol) -> Chem.Mol:
     return mol
 
 
+#: Side chain that a heterocyclisation domain closes onto: the thiol of
+#: cysteine (giving a thiazoline) or the hydroxyl of serine and threonine
+#: (giving an oxazoline).
+CYCLISABLE_SIDE_CHAIN = Chem.MolFromSmarts("[NX3;H2,H1][CX4][CX4][SX2H1,OX2H1]")
+
+#: Temporary tags used while a heterocycle is closed.
+TAG_RING_CARBON = 8
+TAG_RING_NITROGEN = 9
+TAG_LEAVING_OXYGEN = 10
+
+
+def append_heterocycle(chain: Chain, monomer_smiles: str) -> Chain:
+    """Add a residue and close it into a thiazoline or oxazoline ring.
+
+    A heterocyclisation (Cy) domain forms the peptide bond and then
+    dehydrates it: the side-chain thiol or hydroxyl attacks the preceding
+    carbonyl, water leaves, and a five-membered ring containing a C=N bond is
+    left behind. Cysteine gives a thiazoline, serine and threonine an
+    oxazoline.
+
+    Raises:
+        ChemError: if the monomer has no side chain that can close the ring,
+            or the chain does not end in a carbonyl.
+    """
+    monomer = parse_monomer(monomer_smiles)
+    matches = monomer.GetSubstructMatches(CYCLISABLE_SIDE_CHAIN)
+    if not matches:
+        raise ChemError(f"monomer cannot form a heterocycle: {monomer_smiles}")
+    n_idx, _alpha_idx, _beta_idx, side_idx = matches[0]
+    _amine, c_idx, o_idx = find_backbone(monomer)
+
+    rw, offset = _combine(chain.mol, monomer)
+    rw.GetAtomWithIdx(offset + c_idx).SetAtomMapNum(TAG_CARBOXYL_C + 100)
+    rw.GetAtomWithIdx(offset + o_idx).SetAtomMapNum(TAG_CARBOXYL_O + 100)
+    rw.GetAtomWithIdx(offset + n_idx).SetAtomMapNum(TAG_RING_NITROGEN)
+
+    side_atom = rw.GetAtomWithIdx(offset + side_idx)
+    side_atom.SetNumExplicitHs(0)
+    side_atom.SetNoImplicit(True)
+    side_atom.SetAtomMapNum(TAG_CYCLISATION_PARTNER)
+
+    ring_carbon = _tagged_index(rw, TAG_CARBOXYL_C)
+    rw.AddBond(ring_carbon, offset + n_idx, Chem.BondType.SINGLE)
+
+    carbonyl_oxygen = None
+    for neighbour in rw.GetAtomWithIdx(ring_carbon).GetNeighbors():
+        bond = rw.GetBondBetweenAtoms(ring_carbon, neighbour.GetIdx())
+        if neighbour.GetSymbol() == "O" and bond.GetBondType() == Chem.BondType.DOUBLE:
+            carbonyl_oxygen = neighbour.GetIdx()
+            break
+    if carbonyl_oxygen is None:
+        raise ChemError("the chain does not end in a carbonyl to cyclise")
+
+    # Everything that must survive the two removals is tagged first.
+    rw.GetAtomWithIdx(ring_carbon).SetAtomMapNum(TAG_RING_CARBON)
+    rw.GetAtomWithIdx(carbonyl_oxygen).SetAtomMapNum(TAG_LEAVING_OXYGEN)
+
+    _drop_leaving_hydroxyl(rw)
+    rw.RemoveAtom(_tagged_index(rw, TAG_LEAVING_OXYGEN))
+
+    ring_carbon = _tagged_index(rw, TAG_RING_CARBON)
+    ring_nitrogen = _tagged_index(rw, TAG_RING_NITROGEN)
+    ring_side = _tagged_index(rw, TAG_CYCLISATION_PARTNER)
+    rw.GetBondBetweenAtoms(ring_carbon, ring_nitrogen).SetBondType(Chem.BondType.DOUBLE)
+    rw.AddBond(ring_carbon, ring_side, Chem.BondType.SINGLE)
+    for tag in (TAG_RING_CARBON, TAG_RING_NITROGEN, TAG_CYCLISATION_PARTNER):
+        atom = _tagged_atom(rw, tag)
+        if atom is not None:
+            atom.SetAtomMapNum(0)
+
+    _promote_incoming_tags(rw)
+    return Chain(_finalise(rw), chain.history + ["heterocycle"])
+
+
 def append_pks_unit(
     chain: Chain,
     reduction_state: str,

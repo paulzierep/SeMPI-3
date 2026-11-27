@@ -127,7 +127,7 @@ def apply_substrate_fill(spec, fill: Dict[str, str]) -> int:
     return applied
 
 
-def evaluate_entry(
+def evaluate_entry(  # noqa: PLR0913
     accession: str,
     json_dir: Path,
     antismash_dir: Path,
@@ -136,7 +136,11 @@ def evaluate_entry(
     release_prediction: Optional[Dict[str, str]] = None,
     tailoring_enabled: Optional[List[str]] = None,
 ) -> Optional[Result]:
-    """Score every arm for one cluster, or return ``None`` if out of scope."""
+    """Score every arm for one cluster, or return ``None`` if out of scope.
+
+    ``tailoring_enabled`` defaults to :data:`sempi3.tailoring.DEFAULT_REACTIONS`;
+    pass an empty list to switch tailoring off.
+    """
     json_path = Path(json_dir) / f"{accession}.json"
     if not json_path.exists():
         return None
@@ -180,9 +184,12 @@ def evaluate_entry(
                 release_override=(release_prediction or {}).get(accession),
             )
             result.notes.extend(prediction.notes[:2])
-            if prediction.variants and tailoring_enabled and record.tailoring_genes:
+            enabled = (
+                list(tailoring.DEFAULT_REACTIONS) if tailoring_enabled is None else tailoring_enabled
+            )
+            if prediction.variants and enabled and record.tailoring_genes:
                 genes = tailoring.TailoringGenes(counts=record.tailoring_genes)
-                decorated = tailoring.apply(prediction.smiles, genes, enabled=tailoring_enabled)
+                decorated = tailoring.apply(prediction.smiles, genes, enabled=enabled)
                 if decorated and decorated != prediction.smiles:
                     prediction.variants[prediction.release] = decorated
                     prediction.smiles = decorated

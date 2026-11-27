@@ -46,6 +46,8 @@ class Module:
             the beta-keto group created by *this* module's condensation.
         epimerization: An E domain follows the condensation, giving a
             D-configured residue (NRPS only).
+        heterocyclization: A Cy domain replaces the condensation domain, so the
+            residue is closed into a thiazoline or oxazoline ring.
         n_methylation: An nMT domain methylates the backbone nitrogen (NRPS).
         gene: Locus tag or protein id the module was found on, for reporting.
         order: Position in the assembly line, starting at 0.
@@ -63,6 +65,7 @@ class Module:
     dh: bool = False
     er: bool = False
     epimerization: bool = False
+    heterocyclization: bool = False
     n_methylation: bool = False
     gene: Optional[str] = None
     order: int = 0
@@ -101,6 +104,7 @@ class Module:
             "dh": self.dh,
             "er": self.er,
             "epimerization": self.epimerization,
+            "heterocyclization": self.heterocyclization,
             "n_methylation": self.n_methylation,
             "gene": self.gene,
             "order": self.order,
