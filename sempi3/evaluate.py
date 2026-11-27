@@ -11,10 +11,18 @@ cluster:
     SeMPI-3 assembled from the antiSMASH domain annotation. This is the fair
     comparison: same input information, different assembly rules.
 
+``sempi3_antismash_oracle``
+    The same, but scored on the best of its release variants instead of the one
+    it committed to. Not a prediction a user could make: an upper bound that
+    shows what better release-mechanism prediction would be worth.
+
 ``sempi3_mibig``
     SeMPI-3 assembled from MIBiG's curated modules. Curated substrates are
     partly inferred from the known structure, so this arm is an upper bound on
     the assembly chemistry, not a de-novo prediction.
+
+Every arm except the oracle commits to a single structure per cluster, which
+is what a user gets.
 """
 
 from __future__ import annotations
@@ -42,7 +50,7 @@ from . import (
 )
 
 #: The prediction arms, in report order.
-ARMS = ("antismash", "sempi3_antismash", "sempi3_mibig")
+ARMS = ("antismash", "sempi3_antismash", "sempi3_antismash_oracle", "sempi3_mibig")
 
 FIELDS = [
     "bgc_id",
@@ -58,9 +66,6 @@ FIELDS = [
     for metric in ("tanimoto", "coverage_pred", "coverage_true", "atoms", "release")
 ] + [
     "true_smiles",
-    "antismash_smiles",
-    "sempi3_antismash_smiles",
-    "sempi3_mibig_smiles",
     "notes",
 ]
 
@@ -147,8 +152,17 @@ def evaluate_entry(
             prediction = assembly.assemble(record.spec, skip_unknown_substrates=True)
             result.notes.extend(prediction.notes[:2])
             if prediction.variants:
+                # Committed prediction: the single structure a user would get.
                 result.smiles["sempi3_antismash"] = prediction.smiles
                 result.scores["sempi3_antismash"] = compare.best_match(
+                    {prediction.release: prediction.smiles},
+                    entry.structures,
+                    entry.compound_names,
+                    timeout=mcs_timeout,
+                )
+                # Oracle over release variants: an upper bound, not a prediction.
+                result.smiles["sempi3_antismash_oracle"] = prediction.smiles
+                result.scores["sempi3_antismash_oracle"] = compare.best_match(
                     prediction.variants, entry.structures, entry.compound_names, timeout=mcs_timeout
                 )
     else:
@@ -162,7 +176,10 @@ def evaluate_entry(
         if prediction.variants:
             result.smiles["sempi3_mibig"] = prediction.smiles
             result.scores["sempi3_mibig"] = compare.best_match(
-                prediction.variants, entry.structures, entry.compound_names, timeout=mcs_timeout
+                {prediction.release: prediction.smiles},
+                entry.structures,
+                entry.compound_names,
+                timeout=mcs_timeout,
             )
 
     for arm in ARMS:
@@ -248,7 +265,7 @@ def summarise(results: List[Result]) -> Dict[str, object]:
     summary["arms"] = per_arm
 
     # Head-to-head on clusters where both arms made a prediction.
-    for challenger in ("sempi3_antismash", "sempi3_mibig"):
+    for challenger in ("sempi3_antismash", "sempi3_antismash_oracle", "sempi3_mibig"):
         pairs = [
             (r.scores["antismash"].tanimoto, r.scores[challenger].tanimoto)  # type: ignore[union-attr]
             for r in results

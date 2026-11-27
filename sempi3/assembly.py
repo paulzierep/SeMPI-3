@@ -57,6 +57,7 @@ class Prediction:
     Attributes:
         bgc_id: Cluster the prediction belongs to.
         smiles: Backbone for the release mechanism that was chosen.
+        release: The release mechanism SeMPI-3 committed to.
         variants: SMILES for every release mechanism that could be built,
             keyed by mechanism. Reported so a benchmark can separate errors in
             the backbone from errors in the release step.
@@ -69,6 +70,7 @@ class Prediction:
     smiles: Optional[str] = None
     variants: Dict[str, str] = field(default_factory=dict)
     n_modules: int = 0
+    release: Optional[str] = None
     notes: List[str] = field(default_factory=list)
     failed: bool = False
 
@@ -76,6 +78,7 @@ class Prediction:
         return {
             "bgc_id": self.bgc_id,
             "smiles": self.smiles,
+            "release": self.release,
             "variants": self.variants,
             "n_modules": self.n_modules,
             "notes": self.notes,
@@ -95,6 +98,35 @@ def _substrate_smiles(module: Module) -> Optional[str]:
     if substrate.startswith("smiles:"):
         return substrate[len("smiles:") :]
     return monomers.resolve(substrate)
+
+
+def choose_release(spec: ClusterSpec, variants: Dict[str, str]) -> str:
+    """Pick the one release mechanism to report for this cluster.
+
+    Reporting the best of several variants flatters a predictor: it is an
+    oracle that a real user does not have. SeMPI-3 therefore commits to one
+    mechanism, chosen from the domains:
+
+    * a terminal reductase releases an aldehyde;
+    * a thioesterase on an all-NRPS line usually closes a macrolactam, and on
+      a line containing PKS modules a macrolactone;
+    * without either domain the chain is hydrolysed off.
+
+    The oracle is still computed by the benchmark, as an upper bound.
+    """
+    if spec.release == RELEASE_REDUCTION and RELEASE_REDUCTION in variants:
+        return RELEASE_REDUCTION
+
+    kinds = {module.kind for module in spec.modules}
+    if kinds == {NRPS}:
+        preference = [RELEASE_MACROLACTAM, RELEASE_MACROLACTONE, RELEASE_HYDROLYSIS]
+    else:
+        preference = [RELEASE_MACROLACTONE, RELEASE_MACROLACTAM, RELEASE_HYDROLYSIS]
+
+    for mode in preference:
+        if mode in variants:
+            return mode
+    return next(iter(variants))
 
 
 def _release_modes(spec: ClusterSpec, chain: Chain) -> List[str]:
@@ -162,8 +194,8 @@ def assemble(
     if not prediction.variants:
         prediction.failed = True
         return prediction
-    primary = spec.release if spec.release in prediction.variants else RELEASE_HYDROLYSIS
-    prediction.smiles = prediction.variants.get(primary) or next(iter(prediction.variants.values()))
+    prediction.release = choose_release(spec, prediction.variants)
+    prediction.smiles = prediction.variants[prediction.release]
     return prediction
 
 

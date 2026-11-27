@@ -78,8 +78,19 @@ def tanimoto(pred: Chem.Mol, true: Chem.Mol) -> float:
     return float(DataStructs.TanimotoSimilarity(fp_a, fp_b))
 
 
-def compare(pred_smiles: str, true_smiles: str, timeout: int = MCS_TIMEOUT) -> Optional[Similarity]:
-    """Score one prediction against one known structure."""
+def compare(
+    pred_smiles: str,
+    true_smiles: str,
+    timeout: int = MCS_TIMEOUT,
+    with_mcs: bool = True,
+) -> Optional[Similarity]:
+    """Score one prediction against one known structure.
+
+    Args:
+        with_mcs: Run the maximum-common-substructure search. It dominates the
+            runtime, so callers that only need the fingerprint score — such as
+            :func:`best_match` while it is still choosing a pair — switch it off.
+    """
     pred = parse(pred_smiles)
     true = parse(true_smiles)
     if pred is None or true is None:
@@ -90,6 +101,8 @@ def compare(pred_smiles: str, true_smiles: str, timeout: int = MCS_TIMEOUT) -> O
         pred_atoms=pred.GetNumHeavyAtoms(),
         true_atoms=true.GetNumHeavyAtoms(),
     )
+    if not with_mcs:
+        return result
     try:
         mcs = rdFMCS.FindMCS(
             [pred, true],
@@ -123,13 +136,25 @@ def best_match(
     """
     names = list(compound_names or [])
     best: Optional[Similarity] = None
+    best_pair: Optional[tuple] = None
+    # Choosing the pair needs only the cheap fingerprint score. The
+    # maximum-common-substructure search runs once, on the winner.
     for index, true_smiles in enumerate(true_smiles_list):
         for release, pred_smiles in predictions.items():
-            score = compare(pred_smiles, true_smiles, timeout=timeout)
+            score = compare(pred_smiles, true_smiles, timeout=timeout, with_mcs=False)
             if score is None:
                 continue
             score.release = release
             score.compound = names[index] if index < len(names) else None
             if best is None or score.tanimoto > best.tanimoto:
                 best = score
+                best_pair = (pred_smiles, true_smiles)
+
+    if best is None or best_pair is None:
+        return best
+    full = compare(best_pair[0], best_pair[1], timeout=timeout, with_mcs=True)
+    if full is not None:
+        full.release = best.release
+        full.compound = best.compound
+        return full
     return best
